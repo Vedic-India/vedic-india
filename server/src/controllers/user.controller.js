@@ -2,6 +2,8 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { User } from "../models/user.model.js";
+import { Cart } from "../models/cart.model.js";
+import { sendEmail } from "../utils/email.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import { OAuth2Client } from "google-auth-library";
@@ -10,10 +12,53 @@ import crypto from "crypto";
 //TODO: handle 401 errors apart from auth middleware
 //DELETE USER
 
+const mergeGuestCartToUserCart = async (guestId, userId) => {
+    if (!guestId) return;
+
+    const guestCart = await Cart.findOne({
+        guestId
+    });
+
+    if (!guestCart) return;
+
+    let userCart = await Cart.findOne({
+        user: userId
+    });
+
+    if (!userCart) {
+        guestCart.user = userId;
+        guestCart.guestId = undefined;
+
+        await guestCart.save();
+        return;
+    }
+
+    for (const guestItem of guestCart.items) {
+        const existingItem = userCart.items.find(
+            item =>
+                item.product.toString() ===
+                guestItem.product.toString()
+        );
+
+        if (existingItem) {
+            existingItem.quantity +=
+                guestItem.quantity;
+        } else {
+            userCart.items.push(guestItem);
+        }
+    }
+
+    await userCart.save();
+
+    await Cart.findByIdAndDelete(
+        guestCart._id
+    );
+};
+
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const googleLogin = asyncHandler(async (req, res) => {
-    const { credential } = req.body;
+    const { credential, guestId } = req.body;
 
     if (!credential) {
         throw new ApiError(400, "Google token missing");
@@ -60,6 +105,8 @@ const googleLogin = asyncHandler(async (req, res) => {
 
     await user.save({validateBeforeSave: false});
 
+    await mergeGuestCartToUserCart(guestId, user._id);
+
     const loggedInUser = await User.findById(user._id);
 
     const accessTokenOptions = {
@@ -87,7 +134,7 @@ const googleLogin = asyncHandler(async (req, res) => {
 
 const registerUser = asyncHandler(async (req,res)=>{
 
-    const {name, email, password, phone = null} = req.body
+    const {name, email, password, phone = null, guestId} = req.body
 
     if(!name?.trim() || !email?.trim() || !password?.trim()){
         throw new ApiError(400, "All fields are required")
@@ -123,6 +170,8 @@ const registerUser = asyncHandler(async (req,res)=>{
 
     await user.save({validateBeforeSave: false})
 
+    await mergeGuestCartToUserCart(guestId, user._id);
+
     const loggedInUser = await User.findById(user._id)
 
     const accessTokenOptions = {
@@ -150,7 +199,7 @@ const registerUser = asyncHandler(async (req,res)=>{
 
 const loginUser = asyncHandler(async (req,res)=>{
 
-    const {email, password} = req.body
+    const {email, password, guestId} = req.body
 
     if(!email?.trim()){
         throw new ApiError(400,"Email is required")
@@ -180,6 +229,8 @@ const loginUser = asyncHandler(async (req,res)=>{
     user.refreshToken = refreshToken
 
     await user.save({validateBeforeSave: false})
+
+    await mergeGuestCartToUserCart(guestId, user._id);
 
     const loggedInUser = await User.findById(user._id)
 
