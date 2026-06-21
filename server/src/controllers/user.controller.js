@@ -5,6 +5,7 @@ import { User } from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import { OAuth2Client } from "google-auth-library";
+import crypto from "crypto";
 
 //TODO: handle 401 errors apart from auth middleware
 //DELETE USER
@@ -227,6 +228,130 @@ const logoutUser = asyncHandler(async (req,res)=>{
     .clearCookie("refreshToken", options)
     .json( new ApiResponse(200, {}, "User logged out successfully"))
 })
+
+const forgotPassword = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+
+    if (!email?.trim()) {
+        throw new ApiError(400, "Email is required");
+    }
+
+    const user = await User.findOne({
+        email: email.trim().toLowerCase()
+    }).select("+googleId");
+
+    // Don't reveal whether user exists
+    if (!user) {
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                {},
+                "If an account with that email exists, a reset link has been sent."
+            )
+        );
+    }
+
+    if (user.googleId) {
+        throw new ApiError(
+            400,
+            "Password reset is not available for Google accounts."
+        );
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    const hashedToken = crypto
+        .createHash("sha256")
+        .update(resetToken)
+        .digest("hex");
+
+    user.resetPasswordToken = hashedToken;
+    user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; // 15 mins
+
+    await user.save({ validateBeforeSave: false });
+
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+
+    await sendEmail({
+        to: user.email,
+        subject: "Reset Your Password",
+        html: `
+            <div style="font-family: Arial, sans-serif;">
+                <h2>Reset Password</h2>
+
+                <p>
+                    We received a request to reset your password.
+                </p>
+
+                <p>
+                    Click the button below:
+                </p>
+
+                <a
+                    href="${resetUrl}"
+                    style="
+                        display:inline-block;
+                        padding:12px 20px;
+                        background:#000;
+                        color:white;
+                        text-decoration:none;
+                        border-radius:6px;
+                    "
+                >
+                    Reset Password
+                </a>
+
+                <p>
+                    This link expires in 15 minutes.
+                </p>
+
+                <p>
+                    If you didn't request this, ignore this email.
+                </p>
+            </div>
+        `
+    });
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200, {},"If an account with that email exists, a reset link has been sent.")
+    );
+});
+
+const resetPassword = asyncHandler(async (req, res) => {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    if (!password?.trim()) {
+        throw new ApiError(400, "New password is required");
+    }
+
+    const hashedToken = crypto
+        .createHash("sha256")
+        .update(token)
+        .digest("hex");
+
+    const user = await User.findOne({
+        resetPasswordToken: hashedToken,
+        resetPasswordExpires: { $gt: Date.now() }
+    }).select("+password +resetPasswordToken +resetPasswordExpires");
+
+    if (!user) {
+        throw new ApiError(400, "Reset token is invalid or expired");
+    }
+
+    user.password = password;
+
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+
+    await user.save();
+
+    return res.status(200).json(
+        new ApiResponse(200, {}, "Password reset successfully")
+    );
+});
 
 const refreshAccessToken = asyncHandler(async (req,res)=>{
     const incomingRefreshToken = req.cookies?.refreshToken
