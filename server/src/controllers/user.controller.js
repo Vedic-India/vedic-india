@@ -11,6 +11,47 @@ import crypto from "crypto";
 
 //TODO: handle 401 errors apart from auth middleware
 //DELETE USER
+const accessTokenOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    maxAge: 24 * 60 * 60 * 1000  // 1 day
+}
+
+const refreshTokenOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    maxAge: 10 * 24 * 60 * 60 * 1000  // 10 days
+}
+
+const validatePhoneNumber = (phone) => {
+    if (!phone?.trim()) {
+        throw new ApiError(400, "Phone number is required");
+    }
+
+    if (!/^[6-9]\d{9}$/.test(phone)) {
+        throw new ApiError(400, "Invalid phone number");
+    }
+}
+
+const validatePassword = (password) => {
+    if (!password?.trim()) {
+        throw new ApiError(400, "Password is required");
+    }
+
+    if (password.length < 8) {
+        throw new ApiError(400, "Password must be at least 8 characters long");
+    }
+
+    if (!/[A-Z]/.test(password) || !/[a-z]/.test(password)) {
+        throw new ApiError(400, "Password must contain at least one uppercase and one lowercase letter");
+    }
+
+    if (!/[0-9]/.test(password)) {
+        throw new ApiError(400, "Password must contain at least one number");
+    }
+}
 
 const mergeGuestCartToUserCart = async (guestId, userId) => {
     if (!guestId) return;
@@ -41,8 +82,7 @@ const mergeGuestCartToUserCart = async (guestId, userId) => {
         );
 
         if (existingItem) {
-            existingItem.quantity +=
-                guestItem.quantity;
+            existingItem.quantity = Math.min( existingItem.quantity + guestItem.quantity, 10 );
         } else {
             userCart.items.push(guestItem);
         }
@@ -105,20 +145,6 @@ const googleLogin = asyncHandler(async (req, res) => {
 
     const loggedInUser = await User.findById(user._id);
 
-    const accessTokenOptions = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        maxAge: 24 * 60 * 60 * 1000  // 1 day
-    }
-
-    const refreshTokenOptions = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        maxAge: 10 * 24 * 60 * 60 * 1000  // 10 days
-    }
-
     return res
     .status(200)
     .cookie("accessToken", accessToken, accessTokenOptions)
@@ -132,13 +158,13 @@ const registerUser = asyncHandler(async (req,res)=>{
 
     const {name, email, password, phone = null, guestId} = req.body
 
-    if(!name?.trim() || !email?.trim() || !password?.trim()){
+    if(!name?.trim() || !email?.trim()){
         throw new ApiError(400, "All fields are required")
     }
 
-    if (phone && !/^[6-9]\d{9}$/.test(phone)) {
-        throw new ApiError(400, "Invalid phone number");
-    }
+    if(phone) validatePhoneNumber(phone); 
+
+    validatePassword(password);
 
     const existedUser = await User.findOne({
         email: email.trim().toLowerCase()
@@ -169,20 +195,6 @@ const registerUser = asyncHandler(async (req,res)=>{
     await mergeGuestCartToUserCart(guestId, user._id);
 
     const loggedInUser = await User.findById(user._id)
-
-    const accessTokenOptions = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        maxAge: 24 * 60 * 60 * 1000  // 1 day
-    }
-
-    const refreshTokenOptions = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        maxAge: 10 * 24 * 60 * 60 * 1000  // 10 days
-    }
 
     return res
     .status(201)
@@ -229,20 +241,6 @@ const loginUser = asyncHandler(async (req,res)=>{
     await mergeGuestCartToUserCart(guestId, user._id);
 
     const loggedInUser = await User.findById(user._id)
-
-    const accessTokenOptions = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        maxAge: 24 * 60 * 60 * 1000  // 1 day
-    }
-
-    const refreshTokenOptions = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        maxAge: 10 * 24 * 60 * 60 * 1000  // 10 days
-    }
 
     return res
     .status(200)
@@ -316,45 +314,53 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
-    await sendEmail({
-        to: user.email,
-        subject: "Reset Your Password",
-        html: `
-            <div style="font-family: Arial, sans-serif;">
-                <h2>Reset Password</h2>
+    try{
+        await sendEmail({
+            to: user.email,
+            subject: "Reset Your Password",
+            html: `
+                <div style="font-family: Arial, sans-serif;">
+                    <h2>Reset Password</h2>
 
-                <p>
-                    We received a request to reset your password.
-                </p>
+                    <p>
+                        We received a request to reset your password.
+                    </p>
 
-                <p>
-                    Click the button below:
-                </p>
+                    <p>
+                        Click the button below:
+                    </p>
 
-                <a
-                    href="${resetUrl}"
-                    style="
-                        display:inline-block;
-                        padding:12px 20px;
-                        background:#000;
-                        color:white;
-                        text-decoration:none;
-                        border-radius:6px;
-                    "
-                >
-                    Reset Password
-                </a>
+                    <a
+                        href="${resetUrl}"
+                        style="
+                            display:inline-block;
+                            padding:12px 20px;
+                            background:#000;
+                            color:white;
+                            text-decoration:none;
+                            border-radius:6px;
+                        "
+                    >
+                        Reset Password
+                    </a>
 
-                <p>
-                    This link expires in 15 minutes.
-                </p>
+                    <p>
+                        This link expires in 15 minutes.
+                    </p>
 
-                <p>
-                    If you didn't request this, ignore this email.
-                </p>
-            </div>
-        `
-    });
+                    <p>
+                        If you didn't request this, ignore this email.
+                    </p>
+                </div>
+            `
+        });
+    }
+    catch(error){
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save({ validateBeforeSave: false });
+        throw new ApiError(500, "Failed to send reset password email");
+    }
 
     return res
     .status(200)
@@ -367,9 +373,7 @@ const resetPassword = asyncHandler(async (req, res) => {
     const { token } = req.params;
     const { password } = req.body;
 
-    if (!password?.trim()) {
-        throw new ApiError(400, "New password is required");
-    }
+    validatePassword(password);
 
     const hashedToken = crypto
         .createHash("sha256")
@@ -379,7 +383,7 @@ const resetPassword = asyncHandler(async (req, res) => {
     const user = await User.findOne({
         resetPasswordToken: hashedToken,
         resetPasswordExpires: { $gt: Date.now() }
-    }).select("+password +resetPasswordToken +resetPasswordExpires");
+    }).select("+password +refreshToken +resetPasswordToken +resetPasswordExpires");
 
     if (!user) {
         throw new ApiError(400, "Reset token is invalid or expired");
@@ -389,6 +393,8 @@ const resetPassword = asyncHandler(async (req, res) => {
 
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
+
+    user.refreshToken = undefined; // Invalidate existing refresh tokens
 
     await user.save();
 
@@ -425,20 +431,6 @@ const refreshAccessToken = asyncHandler(async (req,res)=>{
     user.refreshToken = newRefreshToken
     await user.save({validateBeforeSave: false})
 
-    const accessTokenOptions = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        maxAge: 24 * 60 * 60 * 1000  // 1 day
-    }
-
-    const refreshTokenOptions = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        maxAge: 10 * 24 * 60 * 60 * 1000  // 10 days
-    }
-
     return res
     .status(200)
     .cookie("accessToken",accessToken,accessTokenOptions)
@@ -451,13 +443,14 @@ const changeCurrentPassword = asyncHandler(async (req,res)=>{
     const { oldPassword, newPassword} = req.body
 
     if(!oldPassword?.trim()) throw new ApiError(400, "Current Password is required");
-    if(!newPassword?.trim()) throw new ApiError(400, "New Password is required");
+
+    validatePassword(newPassword);
 
     if(oldPassword === newPassword){
         throw new ApiError(400, "New password cannot be same as old password")
     }
 
-    const user = await User.findById(req.user._id).select("+password")
+    const user = await User.findById(req.user._id).select("+password +refreshToken")
 
     if(!user.password) {
         throw new ApiError(400, "Password change is not available for Google accounts.");
@@ -470,6 +463,8 @@ const changeCurrentPassword = asyncHandler(async (req,res)=>{
     }
 
     user.password = newPassword
+
+    user.refreshToken = undefined;
 
     await user.save()
 
@@ -507,12 +502,7 @@ const updateName = asyncHandler(async (req,res)=>{
 
 const updatePhone = asyncHandler(async (req,res)=>{
     const {phone} = req.body
-    if(!phone?.trim()){
-        throw new ApiError(400, "Phone number is required")
-    }
-    if (!/^[6-9]\d{9}$/.test(phone)) {
-        throw new ApiError(400, "Invalid phone number");
-    }
+    validatePhoneNumber(phone);
 
     const user = await User.findByIdAndUpdate(
         req.user._id,
@@ -529,17 +519,14 @@ const updatePhone = asyncHandler(async (req,res)=>{
     .json(new ApiResponse(200, user, "Phone number updated successfully"))
 })
 
-
 const addAddress = asyncHandler(async (req,res) => {
 
     const { fullName, phone, addressLine1, addressLine2 = null, city, state, pincode, isDefault = false} = req.body
-    if(!fullName?.trim() || !phone?.trim() || !addressLine1?.trim() || !city?.trim() || !state?.trim() || !pincode?.trim()){
+    if(!fullName?.trim() || !addressLine1?.trim() || !city?.trim() || !state?.trim() || !pincode?.trim()){
         throw new ApiError(400, "All fields except addressLine2 are required")
     }
 
-    if (!/^[6-9]\d{9}$/.test(phone)) {
-        throw new ApiError(400, "Invalid phone number");
-    }
+    validatePhoneNumber(phone);
 
     const user = await User.findById(req.user._id);
 
@@ -581,7 +568,7 @@ const deleteAddress = asyncHandler(async (req,res) => {
         throw new ApiError(404, "Address not found");
     }
 
-    user.addresses = user.addresses.filter(addr => addr._id.toString() !== addressId);
+    user.addresses.pull(addressId);
 
     await user.save({validateBeforeSave: false});
 
@@ -589,7 +576,6 @@ const deleteAddress = asyncHandler(async (req,res) => {
         .status(200)
         .json(new ApiResponse(200, user, "Address deleted successfully"));
 });
-
 
 const makeAddressDefault = asyncHandler(async (req,res) => {
     const { addressId } = req.params
@@ -626,13 +612,11 @@ const editAddress = asyncHandler(async (req,res) => {
         throw new ApiError(400, "Invalid address ID")
     }
 
-    if(!fullName?.trim() || !phone?.trim() || !addressLine1?.trim() || !city?.trim() || !state?.trim() || !pincode?.trim()){
+    if(!fullName?.trim() || !addressLine1?.trim() || !city?.trim() || !state?.trim() || !pincode?.trim()){
         throw new ApiError(400, "All fields except addressLine2 are required")
     }
 
-    if (!/^[6-9]\d{9}$/.test(phone)) {
-        throw new ApiError(400, "Invalid phone number");
-    }
+    validatePhoneNumber(phone);
 
     const user = await User.findById(req.user._id);
     const address = user.addresses.id(addressId);
@@ -641,21 +625,13 @@ const editAddress = asyncHandler(async (req,res) => {
         throw new ApiError(404, "Address not found");
     }
 
-    user.addresses = user.addresses.map(addr => {
-        if(addr._id.toString() === addressId){
-            return {
-                ...addr,
-                fullName,
-                phone,
-                addressLine1,
-                addressLine2,
-                city,
-                state,
-                pincode
-            };
-        }
-        return addr;
-    });
+    address.fullName = fullName;
+    address.phone = phone;
+    address.addressLine1 = addressLine1;
+    address.addressLine2 = addressLine2;
+    address.city = city;
+    address.state = state;
+    address.pincode = pincode;
 
     await user.save({validateBeforeSave: false});
 
