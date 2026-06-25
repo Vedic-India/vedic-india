@@ -91,17 +91,13 @@ const googleLogin = asyncHandler(async (req, res) => {
             googleId: sub
         });
     }
-    else if (user.googleId && user.googleId !== sub) {
-        throw new ApiError(401, "Invalid Google account");
-    }
-    else if (!user.googleId) {
-        throw new ApiError(409, "A user with the same email already exists. Please login using email and password.");
-    }
 
     const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
 
     user.refreshToken = refreshToken;
+
+    user.googleId = sub;
 
     await user.save({validateBeforeSave: false});
 
@@ -212,15 +208,15 @@ const loginUser = asyncHandler(async (req,res)=>{
         email: email.trim().toLowerCase()
     }).select("+password +googleId")
     if(!user){
-        throw new ApiError(404, "No user found")
+        throw new ApiError(401, "Invalid email or password")
     }
-    if(user.googleId){
-        throw new ApiError(400, "This email is registered with Google. Please login using Google Sign-In.")
+    if(!user.password){
+        throw new ApiError(401, "This email is registered with Google. Please login using Google Sign-In.")
     }
     
     const passwordCorrect = await user.isPasswordCorrect(password) 
     if(!passwordCorrect){
-        throw new ApiError(401, "Password is incorrect")
+        throw new ApiError(401, "Invalid email or password")
     }
 
     const accessToken = user.generateAccessToken()
@@ -289,24 +285,21 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
     const user = await User.findOne({
         email: email.trim().toLowerCase()
-    }).select("+googleId");
+    }).select("+password");
 
     // Don't reveal whether user exists
     if (!user) {
-        return res.status(200).json(
+        return res
+            .status(200)
+            .json(
             new ApiResponse(
-                200,
-                {},
-                "If an account with that email exists, a reset link has been sent."
+                200,{},"If an account with that email exists, a reset link has been sent."
             )
         );
     }
 
-    if (user.googleId) {
-        throw new ApiError(
-            400,
-            "Password reset is not available for Google accounts."
-        );
+    if (!user.password) {
+        throw new ApiError(400,"Password reset is not available for Google accounts.");
     }
 
     const resetToken = crypto.randomBytes(32).toString("hex");
@@ -455,25 +448,25 @@ const refreshAccessToken = asyncHandler(async (req,res)=>{
 })
 
 const changeCurrentPassword = asyncHandler(async (req,res)=>{
-    if(req.user.googleId){
-        throw new ApiError(400, "Password change is not allowed for Google authenticated accounts.")
-    }
-
     const { oldPassword, newPassword} = req.body
 
     if(!oldPassword?.trim()) throw new ApiError(400, "Current Password is required");
     if(!newPassword?.trim()) throw new ApiError(400, "New Password is required");
 
+    if(oldPassword === newPassword){
+        throw new ApiError(400, "New password cannot be same as old password")
+    }
+
     const user = await User.findById(req.user._id).select("+password")
+
+    if(!user.password) {
+        throw new ApiError(400, "Password change is not available for Google accounts.");
+    }
 
     const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
 
     if(!isPasswordCorrect){
         throw new ApiError(400, "Password is incorrect")
-    }
-
-    if(oldPassword === newPassword){
-        throw new ApiError(400, "New password cannot be same as old password")
     }
 
     user.password = newPassword
@@ -672,9 +665,12 @@ const editAddress = asyncHandler(async (req,res) => {
 });
 
 export {
+    googleLogin,
     registerUser,
     loginUser,
     logoutUser,
+    forgotPassword,
+    resetPassword,
     refreshAccessToken,
     changeCurrentPassword,
     getCurrentUser,
