@@ -21,6 +21,7 @@ const uploadOnCloudinary = async (localFilePath) => {
             publicId: response.public_id,
         };
     } catch (error) {
+        console.error("Cloudinary upload failed:", error);
         if(fs.existsSync(localFilePath)){
             await fs.promises.unlink(localFilePath)
         }
