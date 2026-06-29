@@ -3,7 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import jwt from "jsonwebtoken"
 
 
-export const verifyJWT = asyncHandler(async (req, res, next)=>{
+export const optionalVerifyJWT = asyncHandler(async (req, res, next)=>{
     const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer","")
     if(!token){
         return next()
