@@ -1,22 +1,24 @@
 import Navbar from "@/components/layout/Navbar";
-import Hero from "@/components/home/Hero";
-import HeroFeatures from "@/components/home/HeroFeatures";
-import FeaturedProducts from "@/components/home/FeaturedProducts";
+import Hero from "@/components/home/hero/Hero";
 import Footer from "@/components/layout/Footer";
-import WhyChoose from "@/components/home/WhyChoose";
-import Stats from "@/components/home/Stats";
+import FeaturedProducts from "@/components/home/products/FeaturedProducts";
+import BenefitsSection from "@/components/home/benefits/BenefitsSection";
+import Testimonials from "@/components/home/testimonials/Testimonials";
+import Newsletter from "@/components/home/newsletter/Newsletter";
+import BackgroundDecoration from "@/components/home/BackgroundDecoration";
 
 export default function Home() {
   return (
     <>
       <Navbar />
+      <BackgroundDecoration />
 
       <main>
         <Hero />
-        <HeroFeatures />
         <FeaturedProducts />
-        <WhyChoose />
-        <Stats />
+        <BenefitsSection />
+        <Testimonials />
+        <Newsletter />
       </main>
 
       <Footer />
