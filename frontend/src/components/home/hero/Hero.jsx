@@ -1,18 +1,14 @@
 import Container from "@/components/layout/Container";
-import FloatingBackground from "./FloatingBackground";
 import HeroContent from "./HeroContent";
 import HeroImage from "./HeroImage";
-import ScrollIndicator from "./ScrollIndicator";
 import FeatureStrip from "./FeatureStrip";
 
 export default function Hero() {
   return (
-    <section className="relative isolate min-h-[720px] overflow-hidden">
-
-      <FloatingBackground />
+    <section className="relative bg-[rgb(221,234,248)] overflow-hidden">
 
       <Container>
-        <div className="grid h-[640px] items-center gap-4 pt-20 lg:grid-cols-[1fr_1fr]">
+        <div className="grid items-center gap-4 pt-16 lg:grid-cols-[1fr_1fr]">
 
           <HeroContent />
 
@@ -21,11 +17,7 @@ export default function Hero() {
         </div>
       </Container>
 
-      <Container>
-        <FeatureStrip />
-      </Container>
-
-      <ScrollIndicator />
+      <FeatureStrip />
 
     </section>
   );

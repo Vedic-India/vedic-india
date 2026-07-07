@@ -15,14 +15,14 @@ export default function HeroContent() {
         Advanced Hydration Technology
       </span>
 
-      <h1 className="mt-6 max-w-[560px] text-[68px] font-black leading-[0.98] tracking-[-0.05em]">
+      <h1 className="mt-6 max-w-[560px] text-[82px] font-black leading-[0.9] tracking-[-0.05em]">
         Hydration.
         <span className="block text-[var(--color-secondary)]">
           Elevated.
         </span>
       </h1>
 
-      <p className="mt-8 max-w-[430px] text-[17px] leading-8 text-slate-600">
+      <p className="mt-10 max-w-[470px] text-[18px] leading-8 text-slate-600">
         Premium alkaline water solutions powered by
         magnetization for better hydration, energy and
         total wellness.
@@ -30,7 +30,7 @@ export default function HeroContent() {
 
       <HeroButtons />
 
-      {/* <HeroStats /> */}
+      <HeroStats />
     </motion.div>
   );
 }
