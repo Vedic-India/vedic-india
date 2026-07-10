@@ -22,7 +22,7 @@ export default function HeroImage() {
         <motion.img
           src="/h.png"
           alt="H+"
-          className="absolute left-[80px] top-[150px] z-20 w-11"
+          className="absolute left-[60px] top-[100px] z-20 h-[85px] w-[130px]"
           animate={{ y: [-8, 8, -8] }}
           transition={{
             duration: 4,
@@ -35,7 +35,7 @@ export default function HeroImage() {
         <motion.img
           src="/oh.png"
           alt="OH-"
-          className="absolute left-[150px] top-[240px] z-20 w-11"
+          className="absolute left-[150px] top-[220px] z-20 h-[85px] w-[130px]"
           animate={{ y: [8, -8, 8] }}
           transition={{
             duration: 4.5,
@@ -46,9 +46,9 @@ export default function HeroImage() {
 
         {/* Mg Bubble */}
         <motion.img
-          src="/mg.png"
+          src="/mg+.png"
           alt="Mg2+"
-          className="absolute right-[70px] top-[120px] z-20 w-11"
+          className="absolute right-[80px] top-[90px] z-20 h-[85px] w-[130px]"
           animate={{ y: [-8, 8, -8] }}
           transition={{
             duration: 5,
@@ -61,7 +61,7 @@ export default function HeroImage() {
         <motion.img
           src="/ca+.png"
           alt="Ca2+"
-          className="absolute right-[160px] top-[230px] z-20 w-11"
+          className="absolute right-[170px] top-[230px] z-20 h-[85px] w-[130px]"
           animate={{ y: [8, -8, 8] }}
           transition={{
             duration: 6,

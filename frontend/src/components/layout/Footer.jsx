@@ -55,7 +55,7 @@ export default function Footer() {
             </h3>
 
             <div className="mt-5 space-y-3 text-white/70">
-              <p>support@vedicindia.com</p>
+              <p>carevedicindia@gmail.com</p>
               <p>+91 XXXXX XXXXX</p>
               <p>New Delhi, India</p>
             </div>

@@ -7,7 +7,7 @@ export default function HeroStats() {
 
       <div className="flex -space-x-3">
         <Image
-          src="/avatar-placeholder.png"
+          src="/avatar1.png"
           alt=""
           width={50}
           height={50}
@@ -15,7 +15,7 @@ export default function HeroStats() {
         />
 
         <Image
-          src="/avatar-placeholder.png"
+          src="/avatar2.png"
           alt=""
           width={50}
           height={50}
@@ -23,7 +23,7 @@ export default function HeroStats() {
         />
 
         <Image
-          src="/avatar-placeholder.png"
+          src="/avatar3.png"
           alt=""
           width={50}
           height={50}

@@ -1,96 +1,145 @@
-"use client";
-
 import Image from "next/image";
-import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
-import BenefitNode from "./BenefitNode";
-import AnimatedRing from "./AnimatedRing";
-import { benefits, scienceContent } from "./data";
-import BackgroundGlow from "./BackgroundGlow";
-
+import {
+  BadgeCheck,
+  FlaskConical,
+  Flower2,
+  Leaf,
+  Droplets,
+  ArrowRight,
+} from "lucide-react";
 
 export default function ScienceSection() {
   return (
-    <section className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#032F2C] via-[#044640] to-[#055A51] px-6 py-16 sm:px-8 lg:px-16 lg:py-24 text-white">
+    <section className="overflow-hidden rounded-[32px] bg-[#042C2F] shadow-[0_25px_60px_rgba(0,0,0,0.12)]">
+      {/* ================= TOP SECTION ================= */}
+      <div className="relative mx-auto h-[520px] max-w-[1650px] overflow-hidden">
+        {/* Left Content */}
+        <div className="relative z-10 flex h-full w-[38%] flex-col justify-center pl-14 pr-6">
+          {/* Badge */}
+          <div className="mb-7 flex items-center gap-3">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="#43D17B"
+            >
+              <path d="M20.7 3.3C16.7 2.8 12.4 4 9.3 7.1C6.8 9.6 5.6 12.8 5.8 16C2.9 15.7 1 13.6 1 10.6C1 5.4 6.5 1 13.2 1C16.2 1 18.8 1.8 20.7 3.3ZM22 4.8C22 12.8 16.3 19.8 9.4 23C10.1 20.6 11.5 18.4 13.4 16.5C16.5 13.4 20.2 12.2 22 12.2V4.8Z" />
+            </svg>
 
-      {/* Background Glow */}
-      <BackgroundGlow />
-
-      <div className="grid items-center gap-12 lg:grid-cols-2">
-
-        {/* LEFT */}
-
-        <motion.div
-          initial={{ opacity: 0, x: -40 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: .7 }}
-          viewport={{ once: true }}
-        >
-          <div className="mb-6 inline-flex items-center rounded-full border border-emerald-400/20 bg-emerald-500/10 px-4 py-2 text-sm font-semibold tracking-wide text-emerald-300">
-            {scienceContent.badge}
+            <span className="text-[15px] font-semibold uppercase tracking-[0.18em] text-[#BED7C8]">
+              WHY VEDIC INDIA?
+            </span>
           </div>
 
-          <h2 className="max-w-xl text-4xl font-black leading-tight sm:text-5xl lg:text-6xl">
-            {scienceContent.heading.first}
-            <span className="block bg-gradient-to-r from-[#7EF3B8] to-[#35C57B] bg-clip-text text-transparent">
-              {scienceContent.heading.highlight}
-            </span>
+          {/* Heading */}
+          <h2 className="max-w-none whitespace-nowrap text-[60px] font-bold leading-[1.08] tracking-[-2px] text-white">
+            The Science Behind
+            <br />
+            Better{" "}
+            <span className="text-[#39D67E]">Hydration</span>
           </h2>
 
-          <p className="mt-6 max-w-lg text-base leading-8 text-white/70 sm:text-lg">
-            {scienceContent.description}
+          {/* Description */}
+          <p className="mt-9 max-w-[520px] text-[18px] leading-[1.85] text-[#D8E6E4]">
+            Our 7-stage advanced technology magnetizes water and enriches it
+            with essential minerals to deliver maximum hydration at cellular
+            level.
           </p>
 
-          <button className="mt-10 inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-emerald-500 to-green-600 px-8 py-4 font-semibold transition-all duration-300 hover:scale-105 hover:shadow-[0_20px_60px_rgba(16,185,129,.35)]">
-            {scienceContent.buttonText}
-            <ArrowRight size={18} />
+          {/* CTA */}
+          <button className="mt-10 flex h-[60px] w-[225px] items-center justify-center gap-3 rounded-full bg-[#0AA55F] text-[21px] font-semibold text-white transition-all duration-300 hover:bg-[#089554]">
+            Learn More
+            <ArrowRight size={22} />
           </button>
-        </motion.div>
+        </div>
 
-        {/* RIGHT */}
+        {/* Right Image */}
+        <div className="absolute right-0 top-0 h-full w-[66%]">
+          <Image
+            src="/images/science2.png"
+            alt="Science Behind Hydration"
+            fill
+            priority
+            className="object-contain object-right"
+            style={{
+              objectPosition: "right -8px",
+            }}
+          />
+        </div>
+      </div>
 
-        <motion.div
-          initial={{ opacity: 0, scale: .9 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          transition={{ duration: .7 }}
-          viewport={{ once: true }}
-          className="relative mx-auto mt-12 h-[380px] w-[380px] sm:h-[520px] sm:w-[520px] lg:mt-0 lg:h-[650px] lg:w-[650px]"
-        >
+      {/* ================= FEATURE STRIP ================= */}
+      <div className="bg-white">
+        <div className="mx-auto flex h-[120px] max-w-[1650px] items-center justify-between px-12">
 
-          {/* Circle */}
+          <Feature
+            icon={<BadgeCheck size={42} strokeWidth={1.8} />}
+            title="ISO Certified"
+            subtitle="Quality Assured"
+          />
 
-          <AnimatedRing />
+          <Divider />
 
-          {/* Center Glow */}
+          <Feature
+            icon={<FlaskConical size={42} strokeWidth={1.8} />}
+            title="Lab Tested"
+            subtitle="For Purity & Safety"
+          />
 
-          <div className="absolute left-1/2 top-1/2 h-[280px] w-[280px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-400/10 blur-[80px]" />
+          <Divider />
 
-          {/* Woman */}
+          <Feature
+            icon={<Flower2 size={42} strokeWidth={1.8} />}
+            title="Made in India"
+            subtitle="Proudly Indian"
+          />
 
-          <div className="absolute left-1/2 top-1/2 z-20 h-[280px] w-[200px] -translate-x-1/2 -translate-y-1/2 sm:h-[360px] sm:w-[250px] lg:h-[470px] lg:w-[330px]">
-            <Image
-              src="/images/woman.png"
-              alt=""
-              fill
-              priority
-              className="object-contain"
-            />
-          </div>
+          <Divider />
 
-          {/* Nodes */}
+          <Feature
+            icon={<Leaf size={42} strokeWidth={1.8} />}
+            title="Eco Friendly"
+            subtitle="Sustainable Choice"
+          />
 
-          {benefits.map((item, index) => (
-                <BenefitNode
-                    key={item.id}
-                    {...item}
-                    index={index}
-                    delay={index * 0.1}
-                />
-           ))}
+          <Divider />
 
-        </motion.div>
+          <Feature
+            icon={<Droplets size={42} strokeWidth={1.8} />}
+            title="100% Natural"
+            subtitle="No Chemicals"
+          />
 
+        </div>
       </div>
     </section>
+  );
+}
+
+function Divider() {
+  return (
+    <div className="h-16 w-px bg-[#E6E8EB]" />
+  );
+}
+
+function Feature({ icon, title, subtitle }) {
+  return (
+    <div className="flex min-w-[220px] items-center gap-5">
+
+      <div className="text-[#16984A]">
+        {icon}
+      </div>
+
+      <div>
+        <h4 className="text-[17px] font-semibold text-[#111827]">
+          {title}
+        </h4>
+
+        <p className="mt-1 text-[15px] text-[#667085]">
+          {subtitle}
+        </p>
+      </div>
+
+    </div>
   );
 }
