@@ -8,7 +8,7 @@ export default function Hero() {
     <section className="relative bg-[rgb(221,234,248)] overflow-hidden">
 
       <Container>
-        <div className="grid items-center gap-4 pt-16 lg:grid-cols-[1fr_1fr]">
+        <div className="grid items-center gap-4 pt-8 lg:grid-cols-[1fr_1fr]">
 
           <HeroContent />
 

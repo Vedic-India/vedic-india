@@ -5,10 +5,10 @@ import { motion } from "framer-motion";
 
 export default function HeroImage() {
   return (
-    <div className="relative flex h-[700px] w-full items-center justify-center">
+    <div className="relative flex w-full items-center justify-center pt-10 ml-10">
 
       {/* Hero Image Container */}
-      <div className="relative h-[720px] w-[720px] bg-transparent">
+      <div className="relative h-[608px] w-[730px] bg-transparent">
 
         <Image
           src="/hero3.png"
@@ -48,7 +48,7 @@ export default function HeroImage() {
         <motion.img
           src="/mg.png"
           alt="Mg2+"
-          className="absolute right-[70px] top-[145px] z-20 w-11"
+          className="absolute right-[70px] top-[120px] z-20 w-11"
           animate={{ y: [-8, 8, -8] }}
           transition={{
             duration: 5,
@@ -61,7 +61,7 @@ export default function HeroImage() {
         <motion.img
           src="/ca+.png"
           alt="Ca2+"
-          className="absolute right-[140px] top-[260px] z-20 w-11"
+          className="absolute right-[160px] top-[230px] z-20 w-11"
           animate={{ y: [8, -8, 8] }}
           transition={{
             duration: 6,

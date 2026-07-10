@@ -10,9 +10,9 @@ import { products } from "./products";
 
 export default function FeaturedProducts() {
   return (
-    <section className="relative overflow-hidden py-28">
+    <section className="relative overflow-hidden py-20">
 
-      <div className="absolute inset-0 bg-gradient-to-b from-white via-sky-50/40 to-white" />
+      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-white via-sky-50/40 to-white" />
 
       <Container>
 

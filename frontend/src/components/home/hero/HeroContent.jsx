@@ -10,6 +10,7 @@ export default function HeroContent() {
       initial={{ opacity: 0, x: -40 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.7 }}
+      className="mt-18 mr-6"
     >
       <span className="inline-flex items-center gap-2 rounded-full bg-[#E9FFF3] px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#0F7C4A]">
         Advanced Hydration Technology

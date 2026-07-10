@@ -13,7 +13,6 @@ export const products = [
     volume: "750 ml",
     price: "₹699",
     image: "/products/glass-bottle.jpeg",
-    badge: "Premium",
   },
   {
     id: 3,
@@ -21,7 +20,6 @@ export const products = [
     volume: "30 ml",
     price: "₹499",
     image: "/products/drops.jpeg",
-    badge: "Popular",
   },
   {
     id: 4,
@@ -29,6 +27,5 @@ export const products = [
     volume: "Home System",
     price: "₹14,999",
     image: "/products/machine.jpeg",
-    badge: "Flagship",
   },
 ];

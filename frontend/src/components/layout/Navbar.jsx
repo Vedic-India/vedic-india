@@ -51,8 +51,8 @@ export default function Navbar() {
         transition={{ duration: 0.45 }}
         className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
           scrolled
-            ? "border-b border-slate-200 bg-white/80 backdrop-blur-xl shadow-sm"
-            : "bg-transparent"
+            ? "border-b border-slate-200 bg-[#F6FAFF]/90 backdrop-blur-xl shadow-sm"
+            : "border-b border-slate-200 bg-[#F6FAFF]/90 backdrop-blur-xl"
         }`}
       >
         <Container>

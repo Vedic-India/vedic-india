@@ -32,17 +32,6 @@ export default function HeroStats() {
       </div>
 
       <div>
-        {/* <div className="flex items-center gap-1">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Star
-              key={i}
-              size={15}
-              fill="#facc15"
-              stroke="#facc15"
-            />
-          ))}
-        </div> */}
-
         <p className="mt-1 text-sm text-[var(--color-muted)]">
           Trusted by 20,000+ Customers
         </p>
