@@ -81,10 +81,10 @@ export default function AboutStory() {
               <Image
                 src="/about/water-splash4.png"
                 alt="Water Splash"
-                width={550}
-                height={550}
+                width={650}
+                height={650}
                 priority
-                className="pointer-events-none w-[550px] select-none"
+                className="pointer-events-none w-[650px] select-none"
               />
 
             </div>
