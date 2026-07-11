@@ -28,8 +28,8 @@ const links = [
     href: "/about",
   },
   {
-    title: "Contact",
-    href: "/contact",
+    title: "FAQs",
+    href: "/faqs",
   },
 ];
 

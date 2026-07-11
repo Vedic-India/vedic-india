@@ -33,7 +33,7 @@ export default function Footer() {
               <Link href="/products">Products</Link>
               <Link href="/benefits">Benefits</Link>
               <Link href="/about">About</Link>
-              <Link href="/contact">Contact</Link>
+              <Link href="/faqs">FAQs</Link>
             </div>
           </div>
 
