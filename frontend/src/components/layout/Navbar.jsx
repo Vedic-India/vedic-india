@@ -20,6 +20,10 @@ const links = [
     href: "/products",
   },
   {
+    title: "Benefits",
+    href: "/benefits"
+  },
+  {
     title: "About",
     href: "/about",
   },
