@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import {
   BadgeCheck,
   FlaskConical,
@@ -47,10 +48,13 @@ export default function ScienceSection() {
           </p>
 
           {/* CTA */}
-          <button className="mt-10 flex h-[60px] w-[225px] items-center justify-center gap-3 rounded-full bg-[#0AA55F] text-[21px] font-semibold text-white transition-all duration-300 hover:bg-[#089554]">
+          <Link 
+            href="/benefits"
+            className="mt-10 flex h-[60px] w-[225px] items-center justify-center gap-3 rounded-full bg-[#0AA55F] text-[21px] font-semibold text-white transition-all duration-300 hover:bg-[#089554]"
+          >
             Learn More
             <ArrowRight size={22} />
-          </button>
+          </Link>
         </div>
 
         {/* Right Image */}
