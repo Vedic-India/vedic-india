@@ -1,28 +1,34 @@
 import { Schema, model } from "mongoose";
 
-const orderItemSchema = new Schema({
-  product: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
-  name: { type: String, required: true }, // snapshot at purchase time
-  price: { type: Number, required: true }, // snapshot at purchase time
-  quantity: { type: Number, required: true, min: 1 },
-});
+const orderItemSchema = new Schema(
+  {
+    product: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
+    name: { type: String, required: true }, // snapshot at purchase time
+    price: { type: Number, required: true }, // snapshot at purchase time
+    image: { type: String, required: true }, // snapshot at purchase time
+    quantity: { type: Number, required: true, min: 1 },
+  },
+  { _id: false }
+);
 
-const shippingAddressSchema = new Schema({
-  fullName: { type: String, required: true },
-  phone: { type: String, required: true },
-  addressLine1: { type: String, required: true },
-  addressLine2: { type: String },
-  city: { type: String, required: true },
-  state: { type: String, required: true },
-  pincode: { type: String, required: true },
-  country: { type: String, default: 'India' },
-});
+const shippingAddressSchema = new Schema(
+  {
+    fullName: { type: String, required: true },
+    phone: { type: String, required: true },
+    addressLine1: { type: String, required: true },
+    addressLine2: { type: String },
+    city: { type: String, required: true },
+    state: { type: String, required: true },
+    pincode: { type: String, required: true },
+  },
+  { _id: false }
+);
 
 const orderSchema = new Schema(
   {
-    user: { 
+    user: {
         type: Schema.Types.ObjectId, 
-        ref: 'User', 
+        ref: 'User',
         required: true 
     },
     items: [orderItemSchema],
@@ -47,6 +53,7 @@ const orderSchema = new Schema(
       razorpayPaymentId: { type: String },
       razorpaySignature: { type: String },
       status: { type: String, enum: ['pending', 'paid', 'failed'], default: 'pending' },
+      paidAt: { type: Date }
     },
 
     orderStatus: {
@@ -54,8 +61,12 @@ const orderSchema = new Schema(
       enum: ['placed', 'confirmed', 'shipped', 'delivered', 'cancelled'],
       default: 'placed',
     },
+
+    deliveredAt: { type: Date },
   },
   { timestamps: true }
 );
+
+orderSchema.index({ user: 1, createdAt: -1 });
 
 module.exports = model('Order', orderSchema);
