@@ -84,6 +84,7 @@ const mergeGuestCartToUserCart = async (guestId, userId) => {
         if (existingItem) {
             existingItem.quantity = Math.min( existingItem.quantity + guestItem.quantity, 10 );
         } else {
+            guestItem.quantity = Math.min(guestItem.quantity, 10);
             userCart.items.push(guestItem);
         }
     }
@@ -98,7 +99,8 @@ const mergeGuestCartToUserCart = async (guestId, userId) => {
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const googleLogin = asyncHandler(async (req, res) => {
-    const { credential, guestId } = req.body;
+    const { credential } = req.body;
+    const guestId = req.cookies?.guestId;
 
     if (!credential) {
         throw new ApiError(400, "Google token missing");
@@ -143,12 +145,19 @@ const googleLogin = asyncHandler(async (req, res) => {
 
     await mergeGuestCartToUserCart(guestId, user._id);
 
+    const options = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
+    }
+
     const loggedInUser = await User.findById(user._id);
 
     return res
     .status(200)
     .cookie("accessToken", accessToken, accessTokenOptions)
     .cookie("refreshToken", refreshToken, refreshTokenOptions)
+    .clearCookie("guestId", options)
     .json(
         new ApiResponse(200, loggedInUser, "User logged in with Google successfully")
     );
@@ -156,7 +165,8 @@ const googleLogin = asyncHandler(async (req, res) => {
 
 const registerUser = asyncHandler(async (req,res)=>{
 
-    const {name, email, password, phone = null, guestId} = req.body
+    const {name, email, password, phone = null} = req.body
+    const guestId = req.cookies?.guestId;
 
     if(!name?.trim() || !email?.trim()){
         throw new ApiError(400, "All fields are required")
@@ -194,12 +204,19 @@ const registerUser = asyncHandler(async (req,res)=>{
 
     await mergeGuestCartToUserCart(guestId, user._id);
 
+    const options = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
+    }
+
     const loggedInUser = await User.findById(user._id)
 
     return res
     .status(201)
     .cookie("accessToken",accessToken,accessTokenOptions)
     .cookie("refreshToken",refreshToken,refreshTokenOptions)
+    .clearCookie("guestId", options)
     .json(
         new ApiResponse(200, loggedInUser, "user created and logged in successfully")
     )
@@ -207,7 +224,8 @@ const registerUser = asyncHandler(async (req,res)=>{
 
 const loginUser = asyncHandler(async (req,res)=>{
 
-    const {email, password, guestId} = req.body
+    const {email, password} = req.body
+    const guestId = req.cookies?.guestId
 
     if(!email?.trim()){
         throw new ApiError(400,"Email is required")
@@ -240,12 +258,19 @@ const loginUser = asyncHandler(async (req,res)=>{
 
     await mergeGuestCartToUserCart(guestId, user._id);
 
+    const options = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
+    }
+
     const loggedInUser = await User.findById(user._id)
 
     return res
     .status(200)
     .cookie("accessToken",accessToken,accessTokenOptions)
     .cookie("refreshToken",refreshToken,refreshTokenOptions)
+    .clearCookie("guestId", options)
     .json(
         new ApiResponse(200, loggedInUser, "user logged in successfully")
     )
