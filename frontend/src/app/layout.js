@@ -1,6 +1,9 @@
 import { Inter, Manrope } from "next/font/google";
 import "./global.css";
+
 import QueryProvider from "@/providers/QueryProvider";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -22,7 +25,15 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`${inter.variable} ${manrope.variable}`}>
         <QueryProvider>
-          {children}
+
+          <Navbar />
+
+          <main className="min-h-screen pt-[88px]">
+            {children}
+          </main>
+
+          <Footer />
+
         </QueryProvider>
       </body>
     </html>

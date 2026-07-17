@@ -3,16 +3,19 @@
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function ProductCard({ product }) {
-  return (
+ return (
+  <Link href={`/products/${product.slug}`}>
+
     <motion.div
       whileHover={{
         y: -10,
         scale: 1.02,
       }}
       transition={{ duration: 0.35 }}
-      className="group mx-auto w-full max-w-[300px] overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-md transition-all duration-500 hover:shadow-[0_35px_60px_rgba(16,24,40,0.16)]"
+      className="group mx-auto w-full max-w-[300px] cursor-pointer overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-md transition-all duration-500 hover:shadow-[0_35px_60px_rgba(16,24,40,0.16)]"
     >
       {/* Image Section */}
 
@@ -60,14 +63,16 @@ export default function ProductCard({ product }) {
             ₹{product.price.toLocaleString()}
           </span>
 
-          <button className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-700 text-white transition-all duration-300 hover:rotate-45 hover:bg-emerald-600">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-700 text-white transition-all duration-300 group-hover:rotate-45 group-hover:bg-emerald-600">
             <ArrowRight size={18} />
-          </button>
+          </div>
 
         </div>
 
       </div>
 
     </motion.div>
-  );
+
+  </Link>
+);
 }
