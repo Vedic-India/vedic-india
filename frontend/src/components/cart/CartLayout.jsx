@@ -4,7 +4,7 @@ import OrderSummary from "./OrderSummary";
 
 export default function CartLayout() {
   return (
-    <section className="bg-slate-50 pt-6 pb-14">
+    <section className="bg-slate-50 pt-30 pb-14">
 
       <div className="mx-auto max-w-7xl px-6">
 
@@ -15,9 +15,9 @@ export default function CartLayout() {
           </span>
         </h1>
 
-        <div className="grid gap-10 lg:grid-cols-[2fr_1fr]">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
 
-          <div className="space-y-6">
+          <div className="space-y-6 lg:col-span-2">
 
             {cartItems.map((item) => (
               <CartItem
