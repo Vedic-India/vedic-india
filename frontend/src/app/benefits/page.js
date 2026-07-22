@@ -5,13 +5,9 @@ import BenefitsSection from "@/components/benefits/BenefitsSection";
 export default function BenefitsPage() {
   return (
     <>
-      <Navbar />
-
       <main>
         <BenefitsSection />
       </main>
-
-      <Footer />
     </>
   );
 }

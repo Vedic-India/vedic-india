@@ -5,13 +5,9 @@ import AboutStory from "@/components/about/AboutStory";
 export default function AboutPage() {
   return (
     <>
-      <Navbar />
-
       <main>
         <AboutStory />
       </main>
-
-      <Footer />
     </>
   );
 }

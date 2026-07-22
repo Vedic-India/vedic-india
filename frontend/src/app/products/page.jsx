@@ -7,14 +7,10 @@ import ProductsGrid from "@/components/products/ProductsGrid";
 export default function ProductsPage() {
   return (
     <>
-      <Navbar />
-
       <main className="pt-[88px] bg-slate-50">
         <ProductsHero />
         <ProductsGrid />
       </main>
-
-      <Footer />
     </>
   );
 }

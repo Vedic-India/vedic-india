@@ -5,13 +5,9 @@ import FAQSection from "@/components/faqs/faqs";
 export default function FAQsPage() {
   return (
     <>
-      <Navbar />
-
       <main>
         <FAQSection />
       </main>
-
-      <Footer />
     </>
   );
 }

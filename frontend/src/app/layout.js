@@ -28,7 +28,7 @@ export default function RootLayout({ children }) {
 
           <Navbar />
 
-          <main className="min-h-screen pt-[88px]">
+          <main className="min-h-screen">
             {children}
           </main>
 

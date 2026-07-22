@@ -15,7 +15,7 @@ export default async function ProductPage({ params }) {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="min-h-screen pt-[88px] bg-slate-50">
 
       <ProductDetails product={product} />
 
