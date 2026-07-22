@@ -9,17 +9,10 @@ import ScienceSection from "@/components/home/science/ScienceSection";
 export default function Home() {
   return (
     <>
-      <Navbar />
-      <BackgroundDecoration />
-
-      <main>
-        <Hero />
-        <FeaturedProducts />
-        <ScienceSection />
-        <Testimonials />
-      </main>
-
-      <Footer />
+      <Hero />
+      <FeaturedProducts />
+      <ScienceSection />
+      <Testimonials />
     </>
   );
 }
