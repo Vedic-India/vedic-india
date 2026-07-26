@@ -94,13 +94,16 @@ export default function Navbar() {
                 <User size={21} />
               </button>
 
-              <button className="relative transition hover:text-[var(--color-secondary)]">
-                <ShoppingCart size={22} />
+              <Link
+  href="/cart"
+  className="relative transition hover:scale-105 hover:text-[var(--color-secondary)]"
+>
+  <ShoppingCart size={22} />
 
-                <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-secondary)] text-[10px] font-semibold text-white">
-                  0
-                </span>
-              </button>
+  <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-secondary)] text-[10px] font-semibold text-white">
+    0
+  </span>
+</Link>
 
             </div>
 
