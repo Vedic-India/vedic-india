@@ -64,9 +64,11 @@ const orderSchema = new Schema(
       razorpayOrderId: { type: String },
       razorpayPaymentId: { type: String },
       razorpaySignature: { type: String },
-      status: { type: String, enum: ['pending', 'processing', 'paid', 'failed'], default: 'pending' },
+      status: { type: String, enum: ['pending', 'processing', 'paid', 'failed', 'refunded'], default: 'pending' },
       paidAt: { type: Date },
       failureReason: { type: String },
+      refundId: { type: String },
+      refundedAt: { type: Date },
     },
 
     orderStatus: {
@@ -74,6 +76,8 @@ const orderSchema = new Schema(
       enum: ['placed', 'confirmed', 'shipped', 'delivered', 'cancelled'],
       default: 'placed',
     },
+
+    shippedAt: { type: Date },
 
     deliveredAt: { type: Date },
 
@@ -85,5 +89,8 @@ const orderSchema = new Schema(
 orderSchema.index({ user: 1, createdAt: -1 });
 orderSchema.index({ orderStatus: 1 });
 orderSchema.index({ createdAt: -1 });
+orderSchema.index({ createdAt: -1, _id: -1 });
+orderSchema.index({ orderStatus: 1, createdAt: -1 });
+orderSchema.index({ "paymentInfo.status": 1, createdAt: -1 });
 
 module.exports = model('Order', orderSchema);
