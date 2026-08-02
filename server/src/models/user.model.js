@@ -62,21 +62,16 @@ const userSchema = new Schema(
   { timestamps: true }
 );
 
-userSchema.pre("save", async function (next) {
-    if (!this.isModified("password")) return next();
+userSchema.pre("save", async function () {
+    if (!this.isModified("password")) return;
 
     this.password = await bcrypt.hash(this.password, 10);
-    next();
 });
 
-userSchema.pre("validate", function(next) {
+userSchema.pre("validate", function () {
     if (!this.password && !this.googleId) {
-        return next(
-            new Error("User must have either password or googleId")
-        );
+        throw new Error("User must have either password or googleId");
     }
-
-    next();
 });
 
 userSchema.methods.isPasswordCorrect = async function (password) {
