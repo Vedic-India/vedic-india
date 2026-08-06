@@ -93,4 +93,4 @@ orderSchema.index({ createdAt: -1, _id: -1 });
 orderSchema.index({ orderStatus: 1, createdAt: -1 });
 orderSchema.index({ "paymentInfo.status": 1, createdAt: -1 });
 
-module.exports = model('Order', orderSchema);
+export const Order = model('Order', orderSchema);

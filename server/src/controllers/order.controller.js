@@ -481,7 +481,12 @@ const getOrderById = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid order ID.");
     }
 
-    const order = await Order.findById(orderId).lean();
+    const order = await Order.findById(orderId)
+        .populate({
+            path: "user",
+            select: "name email phone",
+        })
+        .lean();
 
     if (!order) {
         throw new ApiError(404, "Order not found.");

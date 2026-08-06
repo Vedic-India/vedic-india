@@ -39,6 +39,6 @@ router.route("/:id/status")
 // Generic parameterized route LAST
 router.route("/:id")
     .get(getOrderById)
-    .delete(cancelOrder);
+    .patch(cancelOrder);
 
 export default router;
