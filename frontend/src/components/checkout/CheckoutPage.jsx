@@ -24,6 +24,7 @@ import { useAuth } from "@/context/AuthContext";
 import { queryKeys } from "@/constants/queryKeys";
 import { useCart } from "@/hooks/queries/useCart";
 import { useCreateOrder } from "@/hooks/mutations/useCreateOrder";
+import { verifyPayment } from "@/services/order.service";
 import { addAddress } from "@/services/user.service";
 import { openRazorpayCheckout } from "@/services/payment.service";
 import { Button } from "@/components/ui/button";
@@ -40,7 +41,7 @@ import { cn } from "@/lib/utils";
 
 const PAYMENT_METHODS = [
   {
-    value: "online",
+    value: "razorpay",
     title: "Online Payment (Recommended)",
     subtitle: "UPI • Credit/Debit Cards • Net Banking • Wallets",
     helper: "Powered by Razorpay",
@@ -111,38 +112,6 @@ function getAddressSignature(address) {
     country: address.country || "India",
     isDefault: !!address.isDefault,
   });
-}
-
-function getRazorpayConfig(orderResponse, user) {
-  const paymentInfo = orderResponse?.paymentInfo || {};
-
-  return {
-    keyId:
-      orderResponse?.razorpayKeyId ||
-      orderResponse?.keyId ||
-      paymentInfo?.keyId ||
-      paymentInfo?.razorpayKeyId,
-    orderId:
-      paymentInfo?.razorpayOrderId ||
-      orderResponse?.razorpayOrderId ||
-      orderResponse?.orderId ||
-      orderResponse?._id,
-    amount:
-      paymentInfo?.amount ||
-      orderResponse?.amount ||
-      orderResponse?.totalAmount,
-    currency: paymentInfo?.currency || orderResponse?.currency || "INR",
-    name: orderResponse?.merchantName || "Vedic India",
-    description: orderResponse?.description || "Order payment",
-    prefill: {
-      name: user?.name || "",
-      email: user?.email || "",
-      contact: user?.phone || "",
-    },
-    notes: {
-      orderId: orderResponse?._id || orderResponse?.orderId || "",
-    },
-  };
 }
 
 function EmptyCartState() {
@@ -372,7 +341,7 @@ export default function CheckoutPage() {
   const { user, isAuthenticated, isLoading: isAuthLoading, updateUser } = useAuth();
   const { data, isLoading, isError, error, refetch } = useCart();
   const createOrderMutation = useCreateOrder();
-  const [paymentMethod, setPaymentMethod] = useState("online");
+  const [paymentMethod, setPaymentMethod] = useState("razorpay");
   const [addressSheetOpen, setAddressSheetOpen] = useState(false);
   const [addressDialogOpen, setAddressDialogOpen] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
@@ -475,17 +444,47 @@ export default function CheckoutPage() {
     const payload = {
       paymentMethod,
       addressId: selectedAddress._id,
-      shippingAddressId: selectedAddress._id,
-      paymentType: paymentMethod,
-      shippingAddress: selectedAddress,
     };
 
     createOrderMutation.mutate(payload, {
       onSuccess: async (orderResponse) => {
-        if (paymentMethod === "online") {
+        if (paymentMethod === "razorpay") {
+          const razorpayOrderId = orderResponse?.razorpayOrder?.id;
+          const razorpayAmount = orderResponse?.razorpayOrder?.amount;
+          const razorpayCurrency = orderResponse?.razorpayOrder?.currency;
+          const razorpayKey = orderResponse?.key;
+
+          if (!razorpayOrderId || !razorpayAmount || !razorpayKey) {
+            toast.error("Unable to initiate payment. Please try again.");
+            return;
+          }
+
           try {
             await openRazorpayCheckout({
-              ...getRazorpayConfig(orderResponse, user),
+              keyId: razorpayKey,
+              orderId: razorpayOrderId,
+              amount: razorpayAmount,
+              currency: razorpayCurrency,
+              handler: async (response) => {
+                try {
+                  await verifyPayment(response);
+                  queryClient.invalidateQueries({ queryKey: queryKeys.orders });
+                  queryClient.invalidateQueries({ queryKey: queryKeys.cart });
+                  queryClient.invalidateQueries({ queryKey: queryKeys.currentUser });
+                  toast.success("Payment verified successfully");
+                } catch (paymentError) {
+                  toast.error(
+                    paymentError?.response?.data?.message ??
+                      paymentError?.message ??
+                      "Unable to verify payment."
+                  );
+                }
+              },
+              modal: {
+                ondismiss: () => {
+                  toast.info("Payment was cancelled.");
+                },
+              },
             });
           } catch (paymentError) {
             toast.error(paymentError?.message ?? "Unable to open payment gateway.");
@@ -648,7 +647,7 @@ export default function CheckoutPage() {
                           <p className="text-base font-semibold text-slate-900">
                             {method.title}
                           </p>
-                          {method.value === "online" ? (
+                          {method.value === "razorpay" ? (
                             <Badge variant="success">Recommended</Badge>
                           ) : null}
                           {isDisabled ? <Badge variant="warning">Unavailable</Badge> : null}
@@ -729,7 +728,7 @@ export default function CheckoutPage() {
                         <Loader2 className="mr-2 size-4 animate-spin" />
                         Processing...
                       </>
-                    ) : paymentMethod === "online" ? (
+                    ) : paymentMethod === "razorpay" ? (
                       "Proceed to Payment"
                     ) : (
                       "Place Order & Continue"
@@ -759,7 +758,7 @@ export default function CheckoutPage() {
           if (!open) {
             setSelectedAddressId(draftAddressId);
           } else {
-              setDraftAddressId(committedAddressId);
+            setDraftAddressId(committedAddressId);
           }
 
           setAddressSheetOpen(open);
