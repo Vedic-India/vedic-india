@@ -1,0 +1,13 @@
+import OrderDetailsPage from "@/components/account/OrderDetailsPage";
+
+/**
+ * Route entry for a single customer order.
+ *
+ * @param {Object} props - Next.js route props.
+ * @param {Object} props.params - Route params.
+ * @param {string} props.params.orderId - Order ID.
+ * @returns {JSX.Element} Order details page UI.
+ */
+export default function AccountOrderDetailsRoute({ params }) {
+  return <OrderDetailsPage orderId={params.orderId} />;
+}

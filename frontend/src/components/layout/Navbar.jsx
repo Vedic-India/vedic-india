@@ -5,14 +5,13 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   Menu,
-  Search,
   ShoppingCart,
-  User,
   X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import Container from "./Container";
+import UserAccountDropdown from "./UserAccountDropdown";
 
 const links = [
   {
@@ -60,11 +59,11 @@ export default function Navbar() {
         }`}
       >
         <Container>
-          <div className="flex h-[88px] items-center justify-between">
+          <div className="flex h-22 items-center justify-between">
 
             <Link href="/">
               <Image
-                src="/logo.png"
+                src="/logo1.png"
                 alt="Vedic India"
                 width={170}
                 height={62}
@@ -77,7 +76,7 @@ export default function Navbar() {
                 <Link
                   key={link.title}
                   href={link.href}
-                  className="text-[15px] font-medium text-slate-700 transition hover:text-[var(--color-secondary)]"
+                  className="text-[15px] font-medium text-slate-700 transition hover:text-(--color-secondary)"
                 >
                   {link.title}
                 </Link>
@@ -86,23 +85,17 @@ export default function Navbar() {
 
             <div className="hidden items-center gap-6 lg:flex">
 
-              <button className="transition hover:text-[var(--color-secondary)]">
-                <Search size={21} />
-              </button>
-
-              <button className="transition hover:text-[var(--color-secondary)]">
-                <User size={21} />
-              </button>
+              <UserAccountDropdown />
 
               <Link
   href="/cart"
-  className="relative transition hover:scale-105 hover:text-[var(--color-secondary)]"
+  className="relative transition hover:scale-105 hover:text-(--color-secondary)"
 >
   <ShoppingCart size={22} />
 
-  <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-secondary)] text-[10px] font-semibold text-white">
+  {/* <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-(--color-secondary) text-[10px] font-semibold text-white">
     0
-  </span>
+  </span> */}
 </Link>
 
             </div>

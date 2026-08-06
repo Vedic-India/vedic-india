@@ -1,9 +1,8 @@
 import { Inter, Manrope } from "next/font/google";
 import "./global.css";
-
-import QueryProvider from "@/providers/QueryProvider";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import { Toaster } from "sonner";
+import AppProviders from "@/providers/AppProviders";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -24,17 +23,19 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${inter.variable} ${manrope.variable}`}>
-        <QueryProvider>
-
-          <Navbar />
-
-          <main className="min-h-screen">
+        <GoogleOAuthProvider
+          clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}
+        >
+          <AppProviders>
             {children}
-          </main>
+          </AppProviders>
 
-          <Footer />
-
-        </QueryProvider>
+          <Toaster
+            position="top-right"
+            richColors
+            closeButton
+          />
+        </GoogleOAuthProvider>
       </body>
     </html>
   );

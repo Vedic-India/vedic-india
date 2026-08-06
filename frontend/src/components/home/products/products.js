@@ -2,30 +2,44 @@ export const products = [
   {
     id: 1,
     name: "Alkaline PET Bottle",
-    volume: "500 ml",
-    price: "₹99",
+    slug: "alkaline-pet-bottle",
+    volume: "800 ml",
+    price: "₹1,399",
     image: "/products/pet-bottle.jpeg",
     badge: "Best Seller",
   },
   {
     id: 2,
     name: "Alkaline Glass Bottle",
-    volume: "750 ml",
-    price: "₹699",
+    slug: "alkaline-glass-bottle",
+    volume: "450 ml",
+    price: "₹1,499",
     image: "/products/glass-bottle.jpeg",
   },
   {
     id: 3,
     name: "Alkaline Water Drops",
-    volume: "30 ml",
-    price: "₹499",
+    slug: "alkaline-water-drops",
+    volume: "100 ml",
+    price: "₹2,999",
     image: "/products/drops.jpeg",
   },
   {
     id: 4,
-    name: "Water Ionizer Machine",
+    name: "Alkaline Water Machine",
+    slug: "alkaline-water-machine",
     volume: "Home System",
-    price: "₹14,999",
+    price: "₹24,999",
     image: "/products/machine.jpeg",
   },
 ];
+
+export const getProductVolumeBySlug = (slug) => {
+  if (!slug) {
+    return "";
+  }
+
+  const matchedProduct = products.find((product) => product.slug === slug);
+
+  return matchedProduct?.volume ?? "";
+};

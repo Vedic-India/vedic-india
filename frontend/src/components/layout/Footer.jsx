@@ -11,10 +11,10 @@ export default function Footer() {
 
           <div>
             <Image
-              src="/logo.png"
+              src="/logo1.png"
               alt="Vedic India"
-              width={160}
-              height={60}
+              width={180}
+              height={90}
             />
 
             <p className="mt-6 leading-8 text-white/70">
@@ -43,10 +43,11 @@ export default function Footer() {
             </h3>
 
             <div className="mt-5 flex flex-col gap-3">
-              <p>PET Bottle</p>
-              <p>Glass Bottle</p>
-              <p>Water Drops</p>
-              <p>Ionizer Machine</p>
+              <Link href="/products">All Products</Link>
+              <Link href="/products/alkaline-pet-bottle">PET Bottle</Link>
+              <Link href="/products/alkaline-glass-bottle">Glass Bottle</Link>
+              <Link href="/products/alkaline-water-drops">Water Drops</Link>
+              <Link href="/products/alkaline-water-machine">Alkaline Water Machine</Link>
             </div>
           </div>
 

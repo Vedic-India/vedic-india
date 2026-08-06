@@ -8,7 +8,7 @@ export default function HeroImage() {
     <div className="relative flex w-full items-center justify-center pt-10 ml-10">
 
       {/* Hero Image Container */}
-      <div className="relative h-[608px] w-[730px] bg-transparent">
+      <div className="relative h-[570px] w-[730px] bg-transparent">
 
         <Image
           src="/hero3.png"

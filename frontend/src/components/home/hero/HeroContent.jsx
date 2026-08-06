@@ -31,7 +31,7 @@ export default function HeroContent() {
 
       <HeroButtons />
 
-      <HeroStats />
+      {/* <HeroStats /> */}
     </motion.div>
   );
 }

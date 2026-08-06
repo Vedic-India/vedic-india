@@ -11,7 +11,7 @@ import {
 
 export default function ScienceSection() {
   return (
-    <section className="overflow-hidden rounded-[32px] bg-[#042C2F] shadow-[0_25px_60px_rgba(0,0,0,0.12)]">
+    <section className="mb-20 overflow-hidden rounded-[32px] bg-[#042C2F] shadow-[0_25px_60px_rgba(0,0,0,0.12)]">
       {/* ================= TOP SECTION ================= */}
       <div className="relative mx-auto h-[520px] max-w-[1650px] overflow-hidden">
         {/* Left Content */}
