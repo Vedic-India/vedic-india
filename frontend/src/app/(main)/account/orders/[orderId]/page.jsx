@@ -8,6 +8,8 @@ import OrderDetailsPage from "@/components/account/OrderDetailsPage";
  * @param {string} props.params.orderId - Order ID.
  * @returns {JSX.Element} Order details page UI.
  */
-export default function AccountOrderDetailsRoute({ params }) {
-  return <OrderDetailsPage orderId={params.orderId} />;
+export default async function AccountOrderDetailsRoute({ params }) {
+  const { orderId } = await params;
+
+  return <OrderDetailsPage orderId={orderId} />;
 }

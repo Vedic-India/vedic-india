@@ -1,13 +1,15 @@
 import AdminOrderDetailsPage from "@/components/admin/AdminOrderDetailsPage";
-
 /**
  * Admin order details route entry.
  *
- * @param {Object} props - Next.js route props.
+ * @param {Object} props - Route props.
  * @param {Object} props.params - Route params.
  * @param {string} props.params.orderId - Order ID.
- * @returns {JSX.Element} Admin order details page.
+ * @returns {JSX.Element} Rendered admin order detail experience.
  */
-export default function AdminOrderDetailsRoute({ params }) {
+export default async function AdminOrderDetailsRoute({ params }) {
+  const { orderId } = await params;
+
+  return <AdminOrderDetailsPage orderId={orderId} />;
   return <AdminOrderDetailsPage orderId={params.orderId} />;
 }
