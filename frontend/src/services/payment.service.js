@@ -30,12 +30,12 @@ export const openRazorpayCheckout = async ({
   key,
   orderId,
   amount,
-  currency = "INR",
-  name = "Vedic India",
-  description = "Order payment",
+  currency,
+  name,
+  description,
   prefill = {},
   notes = {},
-  themeColor = "#0f3d2e",
+  themeColor,
   handler,
   modal,
 }) => {
@@ -45,7 +45,7 @@ export const openRazorpayCheckout = async ({
     throw new Error("Unable to load Razorpay checkout.");
   }
 
-  const resolvedKey = keyId || key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+  const resolvedKey = keyId || key;
 
   if (!resolvedKey) {
     throw new Error("Razorpay key is missing.");
@@ -55,17 +55,32 @@ export const openRazorpayCheckout = async ({
     key: resolvedKey,
     amount,
     currency,
-    name,
-    description,
     order_id: orderId,
-    prefill,
-    notes,
-    theme: {
-      color: themeColor,
-    },
     handler,
     modal,
   };
+
+  if (name) {
+    options.name = name;
+  }
+
+  if (description) {
+    options.description = description;
+  }
+
+  if (prefill && Object.keys(prefill).length > 0) {
+    options.prefill = prefill;
+  }
+
+  if (notes && Object.keys(notes).length > 0) {
+    options.notes = notes;
+  }
+
+  if (themeColor) {
+    options.theme = {
+      color: themeColor,
+    };
+  }
 
   const razorpay = new window.Razorpay(options);
   razorpay.open();
