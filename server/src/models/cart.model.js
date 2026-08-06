@@ -42,17 +42,13 @@ const cartSchema = new Schema(
   { timestamps: true }
 );
 
-cartSchema.pre("validate", function(next) {
+cartSchema.pre("validate", function() {
   const hasUser = !!this.user;
   const hasGuest = !!this.guestId;
 
   if (hasUser === hasGuest) {
-    return next(
-      new Error("Cart must belong to either a user or a guest")
-    );
+    throw new Error("Cart must belong to either a user or a guest")
   }
-
-  next();
 });
 
 export const Cart = model('Cart', cartSchema);
