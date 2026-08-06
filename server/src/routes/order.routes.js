@@ -30,14 +30,14 @@ router.route("/my-orders")
 router.route("/admin")
     .get(roleCheck("admin"), getAllOrders);
 
-router.route("/:id/mark-paid")
+router.route("/:orderId/mark-paid")
     .patch(roleCheck("admin"), markOrderPaid);
 
-router.route("/:id/status")
+router.route("/:orderId/status")
     .patch(roleCheck("admin"), updateOrderStatus);
 
 // Generic parameterized route LAST
-router.route("/:id")
+router.route("/:orderId")
     .get(getOrderById)
     .patch(cancelOrder);
 
