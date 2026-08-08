@@ -83,6 +83,7 @@ export const openRazorpayCheckout = async ({
   }
 
   const razorpay = new window.Razorpay(options);
+
   razorpay.open();
 
   return razorpay;
