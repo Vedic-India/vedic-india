@@ -4,6 +4,11 @@ import cookieParser from 'cookie-parser';
 import { errorHandler } from './middlewares/error.middleware.js';
 import { ApiResponse } from './utils/ApiResponse.js';
 import helmet from 'helmet';
+import userRouter from './routes/user.routes.js';
+import productRouter from './routes/product.routes.js';
+import cartRouter from './routes/cart.routes.js';
+import orderRouter from './routes/order.routes.js';
+import webhookRouter from './routes/webhook.routes.js';
 
 const app = express();
 
@@ -12,6 +17,11 @@ app.use(cors({
     origin: process.env.CORS_ORIGIN,  
     credentials: true
 }))
+app.use(
+    '/api/v1/webhooks',
+    express.raw({ type: "application/json" }),
+    webhookRouter
+)
 app.use(express.json({limit: "16kb"}))
 app.use(express.urlencoded({
     extended: true,
@@ -32,11 +42,6 @@ app.get("/api/v1/health", (req, res) => {
         "Server is healthy.",
     ))
 });
-
-import userRouter from './routes/user.routes.js';
-import productRouter from './routes/product.routes.js';
-import cartRouter from './routes/cart.routes.js';
-import orderRouter from './routes/order.routes.js';
 
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/products', productRouter);

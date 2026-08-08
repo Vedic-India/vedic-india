@@ -12,75 +12,9 @@ import { orderPlacedEmail } from "../utils/emailtemplates/orderPlacedEmail.js";
 import { orderShippedEmail } from "../utils/emailtemplates/orderShippedEmail.js";
 import { orderDeliveredEmail } from "../utils/emailtemplates/orderDeliveredEmail.js";
 import { orderCancelledEmail } from "../utils/emailtemplates/orderCancelledEmail.js";
-import { paymentFailedEmail } from "../utils/emailtemplates/paymentFailedEmail.js";
+import { completePaidOrder } from "../services/orderPayment.service.js";
 import mongoose from "mongoose";
 import crypto from "crypto";
-
-const handleFailedPayment = asyncHandler(async ({order, payment, reason = "Unable to fulfil your order."}) => {
-    // Refund the payment
-    const refund = await razorpay.payments.refund(payment.id, { //TODO: IF REFUND FAILS RETRY
-        amount: payment.amount,
-        notes: {
-            orderNumber: order.orderNumber,
-            reason,
-        },
-    });
-
-    // Update order
-    const session = await mongoose.startSession();
-
-    try {
-        session.startTransaction();
-
-        const updatedOrder = await Order.findById(order._id).session(session);
-
-        if (!updatedOrder) {
-            throw new ApiError(404, "Order not found.");
-        }
-
-        updatedOrder.orderStatus = "cancelled";
-
-        updatedOrder.paymentInfo.status = "refunded";
-        updatedOrder.paymentInfo.refundId = refund.id;
-        updatedOrder.paymentInfo.refundedAt = new Date();
-        updatedOrder.paymentInfo.failureReason = reason;
-
-        await updatedOrder.save({ session });
-
-        await session.commitTransaction();
-
-        // Send refund email
-        try {
-            const user = await User.findById(updatedOrder.user).select(
-                "fullName email"
-            );
-
-            if (user?.email) {
-                await sendEmail({
-                    to: user.email,
-                    subject: `Refund Initiated for Order #${updatedOrder.orderNumber}`,
-                    html: paymentFailedEmail({
-                        user,
-                        order: updatedOrder,
-                        reason,
-                    }),
-                });
-            }
-        } catch (emailError) {
-            console.error(
-                "Failed to send refund email:",
-                emailError
-            );
-        }
-
-        return updatedOrder;
-    } catch (error) {
-        await session.abortTransaction();
-        throw error;
-    } finally {
-        session.endSession();
-    }
-});
 
 const createOrder = asyncHandler(async (req, res) => {
     const { addressId } = req.body;
@@ -286,7 +220,7 @@ const createOrder = asyncHandler(async (req, res) => {
 
 const verifyPayment = asyncHandler(async (req, res) => {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
-    
+
     if ( !razorpay_order_id || !razorpay_payment_id || !razorpay_signature ) {
         throw new ApiError(400, "Missing payment details.");
     }
@@ -296,15 +230,17 @@ const verifyPayment = asyncHandler(async (req, res) => {
         .update(`${razorpay_order_id}|${razorpay_payment_id}`)
         .digest("hex");
 
-    if (generatedSignature !== razorpay_signature) {
+    const expectedSignature = Buffer.from(generatedSignature, "utf8");
+    const receivedSignature = Buffer.from(razorpay_signature, "utf8");
+    const signaturesMatch =
+        expectedSignature.length === receivedSignature.length &&
+        crypto.timingSafeEqual(expectedSignature, receivedSignature);
+
+    if (!signaturesMatch) {
         throw new ApiError(400, "Payment verification failed.");
     }
 
     const payment = await razorpay.payments.fetch(razorpay_payment_id);
-
-    if (payment.status !== "captured") {
-        throw new ApiError(400, "Payment has not been captured.");
-    }
 
     if (payment.order_id !== razorpay_order_id) {
         throw new ApiError(400, "Payment does not belong to this order.");
@@ -314,106 +250,22 @@ const verifyPayment = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid payment currency.");
     }
 
-    let failedOrder = null;
+    const { order, alreadyCompleted } = await completePaidOrder({
+        razorpayOrderId: razorpay_order_id,
+        payment,
+        razorpaySignature: razorpay_signature,
+        expectedUserId: req.user._id,
+    });
 
-    const session = await mongoose.startSession();
-
-    try {
-        session.startTransaction();
-
-        const order = await Order.findOne({
-            "paymentInfo.razorpayOrderId": razorpay_order_id,
-        }).session(session);
-
-        if (!order) {
-            throw new ApiError(404, "Order not found.");
-        }
-
-        if (order.user.toString() !== req.user._id.toString()) {
-            throw new ApiError(403, "Unauthorized.");
-        }
-
-        if (order.paymentInfo.status === "paid") {
-            await session.commitTransaction();
-
-            return res.status(200).json(
-                new ApiResponse(200, order,"Payment already verified.")
-            );
-        }
-
-        if (payment.amount !== Math.round(order.totalAmount * 100)) {
-            throw new ApiError(400, "Payment amount mismatch.");
-        }
-
-        for (const item of order.items) {
-            const result = await Product.updateOne(
-                {
-                    _id: item.product,
-                    stock: { $gte: item.quantity },
-                },
-                {
-                    $inc: {
-                        stock: -item.quantity,
-                    },
-                },
-                {
-                    session,
-                }
-            );
-
-            if (result.modifiedCount === 0) {
-                failedOrder = order;
-                throw new ApiError(400, `${item.name} is out of stock.`);
-            }
-        }
-
-        const cart = await Cart.findOne({
-            user: order.user,
-        }).session(session);
-
-        if (cart) {
-            cart.items = [];
-            await cart.save({ session });
-        }
-
-        order.paymentInfo.status = "paid";
-        order.paymentInfo.razorpayPaymentId = razorpay_payment_id;
-        order.paymentInfo.razorpaySignature = razorpay_signature;
-        order.paymentInfo.paidAt = new Date();
-
-        await order.save({ session });
-
-        await session.commitTransaction();
-
-        try {
-            await sendEmail({
-                to: req.user.email,
-                subject: `Your Vedic India Order is Placed (#${order.orderNumber})`,
-                html: orderPlacedEmail({user: req.user, order}),
-            });
-        } catch (error) {
-            console.error("Failed to send order confirmation email:", error);
-        }
-
-        return res.status(200).json(
-            new ApiResponse(200,order,"Payment verified successfully.")
-        );
-
-    } catch (error) {
-        await session.abortTransaction();
-
-        if (failedOrder) {
-            await handleFailedPayment({
-                order: failedOrder,
-                payment,
-                reason: error.message,
-            });
-        }
-
-        throw error;
-    } finally {
-        session.endSession();
-    }
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            order,
+            alreadyCompleted
+                ? "Payment already verified."
+                : "Payment verified successfully."
+        )
+    );
 });
 
 const getMyOrders = asyncHandler(async (req, res) => {
@@ -423,6 +275,12 @@ const getMyOrders = asyncHandler(async (req, res) => {
 
     const filter = {
         user: req.user._id,
+            $nor: [
+            {
+                "paymentInfo.method": "razorpay",
+                "paymentInfo.status": "pending",
+            },
+        ],
     };
 
     if (createdAt && id) {
@@ -492,7 +350,7 @@ const getOrderById = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Order not found.");
     }
 
-    if (req.user.role !== 'admin' && order.user.toString() !== req.user._id.toString()) {
+    if (req.user.role !== 'admin' && order.user._id.toString() !== req.user._id.toString()) {
         throw new ApiError(403, "Unauthorized to access this order.");
     }
 
