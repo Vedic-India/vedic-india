@@ -72,32 +72,49 @@ function getStatusBadgeClass(map, value) {
 
 function OrdersSkeleton() {
   return (
-    <div className="grid gap-5 lg:grid-cols-2">
+    <div className="space-y-5">
       {Array.from({ length: 4 }).map((_, index) => (
         <Card key={index} className="overflow-hidden">
           <CardContent className="p-0">
-            <div className="grid gap-0 md:grid-cols-[180px_minmax(0,1fr)]">
-              <div className="border-b border-slate-100 bg-slate-50 p-5 md:border-b-0 md:border-r">
+            <div className="flex min-h-[190px] flex-col md:flex-row">
+              {/* Image */}
+              <div className="shrink-0 border-b border-slate-100 bg-slate-50 p-4 md:w-[180px] md:border-b-0 md:border-r">
                 <Skeleton className="aspect-square w-full rounded-2xl" />
               </div>
 
-              <div className="space-y-5 p-5 sm:p-6">
-                <div className="flex items-start justify-between gap-4">
+              {/* Content */}
+              <div className="flex flex-1 flex-col justify-between p-5 sm:p-6">
+                <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
                   <div className="space-y-3">
-                    <Skeleton className="h-4 w-28" />
-                    <Skeleton className="h-5 w-44" />
-                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-3 w-36" />
+                    <Skeleton className="h-6 w-28" />
+                    <Skeleton className="h-4 w-56" />
                   </div>
 
-                  <Skeleton className="h-8 w-20 rounded-full" />
+                  <div className="flex flex-wrap gap-4">
+                    <div className="space-y-2">
+                      <Skeleton className="h-2.5 w-20" />
+                      <Skeleton className="h-7 w-20 rounded-full" />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Skeleton className="h-2.5 w-24" />
+                      <Skeleton className="h-7 w-20 rounded-full" />
+                    </div>
+
+                    <Skeleton className="h-14 w-32 rounded-2xl" />
+                  </div>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <Skeleton className="h-12 w-full" />
-                  <Skeleton className="h-12 w-full" />
-                </div>
+                <div className="mt-6 flex flex-col gap-4 border-t border-slate-100 pt-4 sm:flex-row sm:items-end sm:justify-between">
+                  <div className="flex gap-3">
+                    <Skeleton className="h-12 w-28 rounded-xl" />
+                    <Skeleton className="h-12 w-24 rounded-xl" />
+                    <Skeleton className="h-12 w-28 rounded-xl" />
+                  </div>
 
-                <Skeleton className="h-10 w-36 rounded-full" />
+                  <Skeleton className="h-10 w-32 rounded-full" />
+                </div>
               </div>
             </div>
           </CardContent>
@@ -165,119 +182,135 @@ function OrderCard({ order }) {
   const image = getFirstItemImage(order);
 
   return (
-    <Card className="group overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_70px_-38px_rgba(15,23,42,0.35)]">
+    <Card className="group overflow-hidden border-slate-200/80 bg-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_60px_-30px_rgba(15,23,42,0.3)]">
       <CardContent className="p-0">
-        <div className="grid gap-0 md:grid-cols-[180px_minmax(0,1fr)]">
-          <div className="border-b border-slate-100 bg-[linear-gradient(180deg,#f8fafc,white)] p-5 md:border-b-0 md:border-r">
-            <div className="relative aspect-square overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
+        <div className="flex flex-col sm:flex-row">
+          {/* Product Image */}
+          <div className="shrink-0 border-b border-slate-100 bg-[linear-gradient(180deg,#f8fafc,white)] p-4 sm:w-[150px] sm:border-b-0 sm:border-r">
+            <div className="relative aspect-square w-full overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm">
               {image ? (
                 <Image
                   src={image}
                   alt={`Preview for order ${order.orderNumber}`}
                   fill
                   className="object-cover transition duration-500 group-hover:scale-105"
-                  sizes="(max-width: 768px) 100vw, 180px"
+                  sizes="150px"
                 />
               ) : (
                 <div className="flex h-full items-center justify-center text-slate-300">
-                  <PackageSearch className="size-12" />
+                  <PackageSearch className="size-9" />
                 </div>
               )}
             </div>
           </div>
 
-          <div className="space-y-5 p-5 sm:p-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div className="space-y-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-xs font-medium uppercase tracking-[0.24em] text-slate-500">
-                    Order #{order.orderNumber}
+          {/* Main Content */}
+          <div className="flex min-w-0 flex-1 flex-col p-4 sm:p-5">
+            {/* Top Section */}
+            <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1fr)_auto]">
+              {/* Order Info */}
+              <div className="min-w-0">
+                <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-slate-400">
+                  Order #{order.orderNumber}
+                </p>
+
+                <h2 className="mt-1.5 text-base font-semibold tracking-tight text-slate-900">
+                  {formatDate(order.createdAt)}
+                </h2>
+
+                <p className="mt-1 line-clamp-1 text-sm text-slate-500">
+                  {previewNames || "No product preview available"}
+                </p>
+              </div>
+
+              {/* Status + Amount */}
+              <div className="grid grid-cols-3 items-start gap-3">
+                {/* Order Status */}
+                <div className="min-w-[85px]">
+                  <p className="mb-1.5 text-[9px] font-medium uppercase tracking-[0.16em] text-slate-400">
+                    Order Status
                   </p>
 
                   <Badge
                     variant="outline"
                     className={cn(
-                      "border",
-                      getStatusBadgeClass(ORDER_STATUS_STYLES, order.orderStatus)
+                      "whitespace-nowrap border px-2.5 py-0.5 text-xs",
+                      getStatusBadgeClass(
+                        ORDER_STATUS_STYLES,
+                        order.orderStatus
+                      )
                     )}
                   >
                     {getStatusLabel(order.orderStatus)}
                   </Badge>
+                </div>
+
+                {/* Payment Status */}
+                <div className="min-w-[90px]">
+                  <p className="mb-1.5 text-[9px] font-medium uppercase tracking-[0.16em] text-slate-400">
+                    Payment Status
+                  </p>
 
                   <Badge
                     variant="outline"
                     className={cn(
-                      "border",
-                      getStatusBadgeClass(PAYMENT_STATUS_STYLES, order.paymentInfo?.status)
+                      "whitespace-nowrap border px-2.5 py-0.5 text-xs",
+                      getStatusBadgeClass(
+                        PAYMENT_STATUS_STYLES,
+                        order.paymentInfo?.status
+                      )
                     )}
                   >
                     {getStatusLabel(order.paymentInfo?.status)}
                   </Badge>
                 </div>
 
-                <h2 className="text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
-                  {formatDate(order.createdAt)}
-                </h2>
-
-                <p className="max-w-xl text-sm leading-6 text-slate-500">
-                  {previewNames || "No product preview available"}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                <div className="flex size-10 items-center justify-center rounded-full bg-white text-(--color-secondary) shadow-sm">
-                  <ArrowRight className="size-4 -rotate-45" />
-                </div>
-
-                <div>
-                  <p className="text-xs uppercase tracking-[0.22em] text-slate-500">
+                {/* Total */}
+                <div className="min-w-[115px] rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                  <p className="text-[9px] font-medium uppercase tracking-[0.16em] text-slate-400">
                     Total Amount
                   </p>
-                  <p className="text-sm font-semibold text-slate-900">
+
+                  <p className="mt-0.5 text-sm font-semibold text-slate-900">
                     {formatCurrency(order.totalAmount)}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                <p className="text-xs uppercase tracking-[0.22em] text-slate-500">
-                  Payment Method
-                </p>
-                <p className="mt-1 text-sm font-medium capitalize text-slate-900">
-                  {order.paymentInfo?.method || "—"}
-                </p>
+            {/* Bottom Section */}
+            <div className="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-3 sm:flex-row sm:items-center sm:justify-between">
+              {/* Metadata */}
+              <div className="flex flex-wrap gap-2">
+                <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5">
+                  <p className="text-[8px] uppercase tracking-[0.16em] text-slate-400">
+                    Payment Method
+                  </p>
+
+                  <p className="mt-0.5 text-xs font-medium capitalize text-slate-800">
+                    {order.paymentInfo?.method || "—"}
+                  </p>
+                </div>
+
+                <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5">
+                  <p className="text-[8px] uppercase tracking-[0.16em] text-slate-400">
+                    Total Items
+                  </p>
+
+                  <p className="mt-0.5 text-xs font-medium text-slate-800">
+                    {itemCount}
+                  </p>
+                </div>
               </div>
 
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                <p className="text-xs uppercase tracking-[0.22em] text-slate-500">
-                  Total Items
-                </p>
-                <p className="mt-1 text-sm font-medium text-slate-900">
-                  {itemCount}
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 sm:col-span-2 xl:col-span-1">
-                <p className="text-xs uppercase tracking-[0.22em] text-slate-500">
-                  Order Date
-                </p>
-                <p className="mt-1 text-sm font-medium text-slate-900">
-                  {formatDate(order.createdAt)}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-2 text-sm text-slate-500">
-                <PackageSearch className="size-4 text-(--color-secondary)" />
-                <span className="truncate">{previewNames || "Item preview unavailable"}</span>
-              </div>
-
-              <Button asChild className="h-11 rounded-full bg-[linear-gradient(135deg,var(--color-secondary),#0f3d2e)] px-5 text-white shadow-sm hover:opacity-95">
+              {/* View Details */}
+              <Button
+                asChild
+                className="h-9 shrink-0 rounded-full bg-[linear-gradient(135deg,var(--color-secondary),#0f3d2e)] px-4 text-sm text-white shadow-sm hover:opacity-95"
+              >
                 <Link href={`/account/orders/${order._id}`}>
                   View Details
+                  <ArrowRight className="ml-2 size-3.5" />
                 </Link>
               </Button>
             </div>
@@ -288,11 +321,6 @@ function OrderCard({ order }) {
   );
 }
 
-/**
- * Customer "My Orders" page.
- *
- * @returns {JSX.Element} Rendered orders experience for the authenticated customer.
- */
 export default function OrdersPage() {
   const { data, isLoading, isError, error, refetch } = useOrders();
 
@@ -326,7 +354,7 @@ export default function OrdersPage() {
       ) : orders.length === 0 ? (
         <EmptyState />
       ) : (
-        <div className="grid gap-5 lg:grid-cols-2">
+        <div className="space-y-5">
           {orders.map((order) => (
             <OrderCard key={order._id} order={order} />
           ))}
