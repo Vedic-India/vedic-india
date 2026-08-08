@@ -4,7 +4,10 @@ import {
     createContext,
     useContext,
     useMemo,
+    useEffect,
 } from "react";
+
+import { useRouter } from "next/navigation";
 
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -41,21 +44,7 @@ export function AuthProvider({ children }) {
             await logoutUser();
         } finally {
 
-            queryClient.removeQueries({
-                queryKey: queryKeys.currentUser,
-            });
-
-            queryClient.removeQueries({
-                queryKey: queryKeys.cart,
-            });
-
-            queryClient.removeQueries({
-                queryKey: queryKeys.orders,
-            });
-
-            queryClient.invalidateQueries({
-                queryKey: queryKeys.products,
-            });
+            queryClient.clear();
         }
     };
 
@@ -75,6 +64,22 @@ export function AuthProvider({ children }) {
         }),
         [user, isLoading]
     );
+
+    const router = useRouter();
+
+    useEffect(() => {
+    const handleAuthLogout = () => {
+        queryClient.clear();
+
+        router.replace("/login");
+    };
+
+    window.addEventListener("auth:logout", handleAuthLogout);
+
+    return () => {
+        window.removeEventListener("auth:logout", handleAuthLogout);
+    };
+    }, [queryClient, router]);
 
     return (
         <AuthContext.Provider value={value}>
