@@ -7,8 +7,6 @@ import {
     useEffect,
 } from "react";
 
-import { useRouter } from "next/navigation";
-
 import { useQueryClient } from "@tanstack/react-query";
 
 import { logoutUser } from "@/services/auth.service";
@@ -65,13 +63,9 @@ export function AuthProvider({ children }) {
         [user, isLoading]
     );
 
-    const router = useRouter();
-
     useEffect(() => {
     const handleAuthLogout = () => {
         queryClient.clear();
-
-        router.replace("/login");
     };
 
     window.addEventListener("auth:logout", handleAuthLogout);
@@ -79,7 +73,7 @@ export function AuthProvider({ children }) {
     return () => {
         window.removeEventListener("auth:logout", handleAuthLogout);
     };
-    }, [queryClient, router]);
+    }, [queryClient]);
 
     return (
         <AuthContext.Provider value={value}>
