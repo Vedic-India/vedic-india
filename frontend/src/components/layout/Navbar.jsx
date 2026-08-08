@@ -3,24 +3,25 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  Menu,
-  ShoppingCart,
-  X,
-} from "lucide-react";
+import { Menu, ShoppingCart, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { usePathname } from "next/navigation";
 
 import Container from "./Container";
 import UserAccountDropdown from "./UserAccountDropdown";
 
 const links = [
   {
+    title: "Home",
+    href: "/",
+  },
+  {
     title: "Products",
     href: "/products",
   },
   {
     title: "Benefits",
-    href: "/benefits"
+    href: "/benefits",
   },
   {
     title: "About",
@@ -35,6 +36,8 @@ const links = [
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
+
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -52,15 +55,13 @@ export default function Navbar() {
         initial={{ y: -80 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.45 }}
-        className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
-          scrolled
-            ? "border-b border-slate-200 bg-[#F6FAFF]/90 backdrop-blur-xl shadow-sm"
-            : "border-b border-slate-200 bg-[#F6FAFF]/90 backdrop-blur-xl"
+        className={`fixed inset-x-0 top-0 z-50 border-b border-slate-200 bg-[#F6FAFF]/90 backdrop-blur-xl transition-all duration-300 ${
+          scrolled ? "shadow-sm" : ""
         }`}
       >
         <Container>
           <div className="flex h-22 items-center justify-between">
-
+            {/* Logo */}
             <Link href="/">
               <Image
                 src="/logo1.png"
@@ -71,49 +72,56 @@ export default function Navbar() {
               />
             </Link>
 
+            {/* Desktop Navigation */}
             <nav className="hidden items-center gap-10 lg:flex">
-              {links.map((link) => (
-                <Link
-                  key={link.title}
-                  href={link.href}
-                  className="text-[15px] font-medium text-slate-700 transition hover:text-(--color-secondary)"
-                >
-                  {link.title}
-                </Link>
-              ))}
+              {links.map((link) => {
+                const isActive = pathname === link.href;
+
+                return (
+                  <Link
+                    key={link.title}
+                    href={link.href}
+                    className={`text-[15px] font-medium transition-colors ${
+                      isActive
+                        ? "text-(--color-secondary)"
+                        : "text-slate-700 hover:text-(--color-secondary)"
+                    }`}
+                  >
+                    {link.title}
+                  </Link>
+                );
+              })}
             </nav>
 
+            {/* Desktop Actions */}
             <div className="hidden items-center gap-6 lg:flex">
-
               <UserAccountDropdown />
 
               <Link
-  href="/cart"
-  className="relative transition hover:scale-105 hover:text-(--color-secondary)"
->
-  <ShoppingCart size={22} />
-
-  {/* <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-(--color-secondary) text-[10px] font-semibold text-white">
-    0
-  </span> */}
-</Link>
-
+                href="/cart"
+                className="relative transition hover:scale-105 hover:text-(--color-secondary)"
+              >
+                <ShoppingCart size={22} />
+              </Link>
             </div>
 
+            {/* Mobile Menu Button */}
             <button
               className="lg:hidden"
               onClick={() => setMobileMenu(true)}
+              aria-label="Open menu"
             >
               <Menu size={28} />
             </button>
-
           </div>
         </Container>
       </motion.header>
 
+      {/* Mobile Menu */}
       <AnimatePresence>
         {mobileMenu && (
           <>
+            {/* Overlay */}
             <motion.div
               className="fixed inset-0 z-50 bg-black/40"
               initial={{ opacity: 0 }}
@@ -122,6 +130,7 @@ export default function Navbar() {
               onClick={() => setMobileMenu(false)}
             />
 
+            {/* Drawer */}
             <motion.div
               className="fixed left-0 top-0 z-50 h-full w-80 bg-white p-8"
               initial={{ x: "-100%" }}
@@ -130,22 +139,33 @@ export default function Navbar() {
               transition={{ duration: 0.3 }}
             >
               <div className="flex justify-end">
-                <button onClick={() => setMobileMenu(false)}>
+                <button
+                  onClick={() => setMobileMenu(false)}
+                  aria-label="Close menu"
+                >
                   <X size={28} />
                 </button>
               </div>
 
               <div className="mt-12 flex flex-col gap-8">
-                {links.map((link) => (
-                  <Link
-                    key={link.title}
-                    href={link.href}
-                    onClick={() => setMobileMenu(false)}
-                    className="text-xl font-semibold text-slate-700"
-                  >
-                    {link.title}
-                  </Link>
-                ))}
+                {links.map((link) => {
+                  const isActive = pathname === link.href;
+
+                  return (
+                    <Link
+                      key={link.title}
+                      href={link.href}
+                      onClick={() => setMobileMenu(false)}
+                      className={`text-xl font-semibold transition-colors ${
+                        isActive
+                          ? "text-(--color-secondary)"
+                          : "text-slate-700 hover:text-(--color-secondary)"
+                      }`}
+                    >
+                      {link.title}
+                    </Link>
+                  );
+                })}
               </div>
             </motion.div>
           </>
