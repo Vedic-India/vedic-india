@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -112,6 +112,20 @@ function getAddressSignature(address) {
     country: address.country || "India",
     isDefault: !!address.isDefault,
   });
+}
+
+function getPaymentProcessingMessage(error) {
+  const status = error?.response?.status;
+
+  if (status === 401) {
+    return "We could not confirm your payment immediately. Your payment may still be processing.";
+  }
+
+  return (
+    error?.response?.data?.message ??
+    error?.message ??
+    "We could not confirm your payment immediately. Your payment may still be processing."
+  );
 }
 
 function EmptyCartState() {
@@ -342,10 +356,12 @@ export default function CheckoutPage() {
   const { data, isLoading, isError, error, refetch } = useCart();
   const createOrderMutation = useCreateOrder();
   const [paymentMethod, setPaymentMethod] = useState("razorpay");
+  const [isPaymentFlowActive, setIsPaymentFlowActive] = useState(false);
   const [addressSheetOpen, setAddressSheetOpen] = useState(false);
   const [addressDialogOpen, setAddressDialogOpen] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [draftAddressId, setDraftAddressId] = useState(null);
+  const paymentFlowSessionRef = useRef(0);
 
   const cart = data ?? {
     items: [],
@@ -437,7 +453,7 @@ export default function CheckoutPage() {
   };
 
   const handlePlaceOrder = async () => {
-    if (validationMessages.length > 0 || !selectedAddress) {
+    if (validationMessages.length > 0 || !selectedAddress || createOrderMutation.isPending || isPaymentFlowActive) {
       return;
     }
 
@@ -446,56 +462,123 @@ export default function CheckoutPage() {
       addressId: selectedAddress._id,
     };
 
-    createOrderMutation.mutate(payload, {
-      onSuccess: async (orderResponse) => {
-        if (paymentMethod === "razorpay") {
-          const razorpayOrderId = orderResponse?.razorpayOrder?.id;
-          const razorpayAmount = orderResponse?.razorpayOrder?.amount;
-          const razorpayCurrency = orderResponse?.razorpayOrder?.currency;
-          const razorpayKey = orderResponse?.key;
+    const sessionId = paymentFlowSessionRef.current + 1;
+    paymentFlowSessionRef.current = sessionId;
+    let checkoutSettled = false;
+    let paymentVerificationStarted = false;
 
-          if (!razorpayOrderId || !razorpayAmount || !razorpayKey) {
-            toast.error("Unable to initiate payment. Please try again.");
-            return;
-          }
+    setIsPaymentFlowActive(true);
 
-          try {
-            await openRazorpayCheckout({
-              keyId: razorpayKey,
-              orderId: razorpayOrderId,
-              amount: razorpayAmount,
-              currency: razorpayCurrency,
-              handler: async (response) => {
-                try {
-                  await verifyPayment(response);
-                  queryClient.invalidateQueries({ queryKey: queryKeys.orders });
-                  queryClient.invalidateQueries({ queryKey: queryKeys.cart });
-                  queryClient.invalidateQueries({ queryKey: queryKeys.currentUser });
-                  toast.success("Payment verified successfully");
-                } catch (paymentError) {
-                  toast.error(
-                    paymentError?.response?.data?.message ??
-                      paymentError?.message ??
-                      "Unable to verify payment."
-                  );
-                }
-              },
-              modal: {
-                ondismiss: () => {
-                  toast.info("Payment was cancelled.");
-                },
-              },
-            });
-          } catch (paymentError) {
-            toast.error(paymentError?.message ?? "Unable to open payment gateway.");
-          }
+    try {
+      const orderResponse = await createOrderMutation.mutateAsync(payload);
 
+      if (paymentMethod === "razorpay") {
+        const createdOrder = orderResponse?.order;
+        const razorpayOrder = orderResponse?.razorpayOrder;
+        const razorpayKey = orderResponse?.key;
+
+        const razorpayOrderId = razorpayOrder?.id;
+        const razorpayAmount = razorpayOrder?.amount;
+        const razorpayCurrency = razorpayOrder?.currency;
+
+        if (!createdOrder?._id || !razorpayOrderId || !razorpayAmount || !razorpayCurrency || !razorpayKey) {
+          setIsPaymentFlowActive(false);
+          toast.error("Unable to initiate payment. Please try again.");
           return;
         }
 
-        toast.success("Order placed successfully");
-      },
-    });
+        const orderId = createdOrder._id;
+
+        await openRazorpayCheckout({
+          keyId: razorpayKey,
+          orderId: razorpayOrderId,
+          amount: razorpayAmount,
+          currency: razorpayCurrency,
+          name: "Vedic India",
+          description: `Order #${createdOrder.orderNumber}`,
+          prefill: {
+            name: selectedAddress?.fullName || "",
+            contact: selectedAddress?.phone || "",
+            email: user?.email || "",
+          },
+          notes: {
+            orderNumber: createdOrder.orderNumber,
+            orderId,
+          },
+          themeColor: "#1ca67a",
+          handler: async (response) => {
+            if (checkoutSettled || paymentFlowSessionRef.current !== sessionId) {
+              return;
+            }
+
+            paymentVerificationStarted = true;
+
+            try {
+              const verifiedOrder = await verifyPayment(response);
+
+              await Promise.all([
+                queryClient.invalidateQueries({ queryKey: queryKeys.orders }),
+                queryClient.invalidateQueries({ queryKey: queryKeys.cart }),
+                queryClient.invalidateQueries({ queryKey: queryKeys.currentUser }),
+                queryClient.invalidateQueries({ queryKey: queryKeys.order(verifiedOrder?._id || orderId) }),
+              ]);
+
+              checkoutSettled = true;
+              setIsPaymentFlowActive(false);
+              toast.success("Payment verified successfully");
+              router.push(`/order-success?orderId=${encodeURIComponent(verifiedOrder?._id || orderId)}`);
+            } catch (paymentError) {
+              if (checkoutSettled || paymentFlowSessionRef.current !== sessionId) {
+                return;
+              }
+
+              checkoutSettled = true;
+              setIsPaymentFlowActive(false);
+              const processingMessage = getPaymentProcessingMessage(paymentError);
+
+              toast.info(processingMessage);
+              router.push(
+                `/payment-processing?orderId=${encodeURIComponent(orderId)}&reason=${encodeURIComponent(processingMessage)}`
+              );
+            }
+          },
+          modal: {
+            ondismiss: () => {
+              if (
+                checkoutSettled ||
+                paymentFlowSessionRef.current !== sessionId ||
+                paymentVerificationStarted
+              ) {
+                return;
+              }
+
+              checkoutSettled = true;
+              setIsPaymentFlowActive(false);
+              router.push(`/payment-failed?status=not-completed&orderId=${encodeURIComponent(orderId)}`);
+            },
+          },
+        });
+
+        return;
+      }
+
+      setIsPaymentFlowActive(false);
+      toast.success("Order placed successfully");
+
+      const createdOrderId = orderResponse?.order?._id;
+
+      if (createdOrderId) {
+        router.push(`/order-success?orderId=${encodeURIComponent(createdOrderId)}`);
+      }
+    } catch (paymentError) {
+      setIsPaymentFlowActive(false);
+
+      toast.error(
+        paymentError?.response?.data?.message ??
+          paymentError?.message ??
+          "Unable to place order."
+      );
+    }
   };
 
   if (isAuthLoading || isLoading) {
@@ -570,7 +653,7 @@ export default function CheckoutPage() {
               description="Choose the shipping address for this order."
               action={
                 addresses.length > 0 ? (
-                  <Button type="button" variant="outline" size="sm" onClick={() => setAddressSheetOpen(true)}>
+                  <Button type="button" variant="outline" size="sm" onClick={() => setAddressSheetOpen(true)} disabled={isPaymentFlowActive}>
                     Change Address
                   </Button>
                 ) : null
@@ -588,7 +671,7 @@ export default function CheckoutPage() {
                     Add a delivery address to continue.
                   </p>
 
-                  <Button onClick={() => setAddressDialogOpen(true)} className="mt-6 h-11 rounded-full px-5">
+                  <Button onClick={() => setAddressDialogOpen(true)} className="mt-6 h-11 rounded-full px-5" disabled={isPaymentFlowActive}>
                     <Plus className="size-4" />
                     Add New Address
                   </Button>
@@ -634,7 +717,7 @@ export default function CheckoutPage() {
                         value={method.value}
                         checked={isSelected}
                         onChange={() => setPaymentMethod(method.value)}
-                        disabled={isDisabled}
+                        disabled={isDisabled || isPaymentFlowActive}
                         className="mt-1 size-4 accent-(--color-secondary)"
                       />
 
@@ -720,13 +803,18 @@ export default function CheckoutPage() {
                   <Button
                     type="button"
                     onClick={handlePlaceOrder}
-                    disabled={validationMessages.length > 0 || createOrderMutation.isPending}
-                    className="h-12 w-full rounded-full px-6"
+                    disabled={validationMessages.length > 0 || createOrderMutation.isPending || isPaymentFlowActive}
+                    className="h-12 w-full rounded-xl bg-emerald-700 font-semibold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-emerald-700 disabled:opacity-60"
                   >
                     {createOrderMutation.isPending ? (
                       <>
                         <Loader2 className="mr-2 size-4 animate-spin" />
                         Processing...
+                      </>
+                    ) : isPaymentFlowActive && paymentMethod === "razorpay" ? (
+                      <>
+                        <Loader2 className="mr-2 size-4 animate-spin" />
+                        Opening payment gateway...
                       </>
                     ) : paymentMethod === "razorpay" ? (
                       "Proceed to Payment"
