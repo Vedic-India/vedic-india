@@ -434,16 +434,18 @@ function OrderTimeline({ order }) {
   );
 }
 
-function CancelOrderCard({ orderStatus }) {
+function CancelOrderCard({ orderId, orderStatus }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const cancelOrderMutation = useCancelOrder();
+
+  console.log("CancelOrderCard - orderId:", orderId, "orderStatus:", orderStatus);
 
   if (!["placed", "confirmed"].includes(orderStatus)) {
     return null;
   }
 
   const handleConfirmCancel = async () => {
-    await cancelOrderMutation.mutateAsync();
+    await cancelOrderMutation.mutateAsync(orderId);
     setIsDialogOpen(false);
   };
 
@@ -457,7 +459,10 @@ function CancelOrderCard({ orderStatus }) {
           </p>
         </div>
 
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog
+          open={isDialogOpen}
+          onOpenChange={setIsDialogOpen}
+        >
           <Button
             type="button"
             variant="destructive"
@@ -465,14 +470,18 @@ function CancelOrderCard({ orderStatus }) {
             disabled={cancelOrderMutation.isPending}
             className="h-11 rounded-full px-5"
           >
-            {cancelOrderMutation.isPending ? "Cancelling..." : "Cancel Order"}
+            {cancelOrderMutation.isPending
+              ? "Cancelling..."
+              : "Cancel Order"}
           </Button>
 
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Cancel this order?</DialogTitle>
+
               <DialogDescription>
-                Are you sure you want to cancel this order? This action cannot be undone.
+                Are you sure you want to cancel this order? This action
+                cannot be undone.
               </DialogDescription>
             </DialogHeader>
 
@@ -492,7 +501,9 @@ function CancelOrderCard({ orderStatus }) {
                 onClick={handleConfirmCancel}
                 disabled={cancelOrderMutation.isPending}
               >
-                {cancelOrderMutation.isPending ? "Cancelling..." : "Confirm Cancel"}
+                {cancelOrderMutation.isPending
+                  ? "Cancelling..."
+                  : "Confirm Cancel"}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -637,7 +648,7 @@ export default function OrderDetailsPage({ orderId }) {
             <SummaryCard order={order} />
             <OrderItemsCard order={order} />
             <OrderTimeline order={order} />
-            <CancelOrderCard orderStatus={order.orderStatus} />
+            <CancelOrderCard orderId={order._id} orderStatus={order.orderStatus} />
           </div>
 
           <div className="space-y-6">
