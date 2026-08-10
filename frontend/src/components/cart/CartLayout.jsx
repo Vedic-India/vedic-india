@@ -115,7 +115,7 @@ function getWarningMessage(items, hasUnavailableItems) {
 
 export default function CartLayout() {
   const router = useRouter();
-  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { data, isLoading, isError, error, refetch } = useCart();
   const updateCartItemMutation = useUpdateCartItem();
   const removeCartItemMutation = useRemoveCartItem();
@@ -135,7 +135,6 @@ export default function CartLayout() {
   const checkoutDisabled =
     itemCount === 0 ||
     Boolean(warningMessage) ||
-    isAuthLoading ||
     updateCartItemMutation.isPending ||
     removeCartItemMutation.isPending ||
     clearCartMutation.isPending;
@@ -165,11 +164,16 @@ export default function CartLayout() {
   };
 
   const handleCheckout = () => {
+    if (!isAuthenticated) {
+      router.push("/login");
+      return;
+    }
+
     if (checkoutDisabled) {
       return;
     }
 
-    router.push(isAuthenticated ? "/checkout" : "/login");
+    router.push("/checkout");
   };
 
   if (isLoading) {
