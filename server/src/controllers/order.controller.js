@@ -604,7 +604,6 @@ const cancelOrder = asyncHandler(async (req, res) => {
         if (!order) {
             throw new ApiError(404, "Order not found.");
         }
-
         const isAdmin = req.user.role === "admin";
 
         if (
@@ -655,11 +654,13 @@ const cancelOrder = asyncHandler(async (req, res) => {
             order.paymentInfo.status === "paid"
         ) {
             const refund = await razorpay.payments.refund(
-                order.paymentInfo.paymentId,
+                order.paymentInfo.razorpayPaymentId,
                 {
                     amount: Math.round(order.totalAmount * 100),
                 }
             );
+
+            console.log("Refund status:", refund.status);
 
             order.paymentInfo.status = "refunded";
             order.paymentInfo.refundId = refund.id;
