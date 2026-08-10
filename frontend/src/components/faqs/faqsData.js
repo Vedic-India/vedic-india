@@ -45,11 +45,6 @@ export const faqs = [
       "Clean your bottle regularly with mild soap and water. For water machines, follow the maintenance instructions provided in the user manual and replace filters as recommended.",
   },
   {
-    question: "Do your products come with a warranty?",
-    answer:
-      "Our water machines include a manufacturer warranty. Warranty duration and coverage vary by product, so please check the product page for complete details.",
-  },
-  {
     question: "Are Vedic India products safe for daily use?",
     answer:
       "Yes. Our products are manufactured using premium-quality materials and undergo rigorous quality testing to ensure they are safe for everyday use.",
