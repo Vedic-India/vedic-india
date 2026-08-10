@@ -42,7 +42,18 @@ export function AuthProvider({ children }) {
             await logoutUser();
         } finally {
 
-            queryClient.clear();
+            queryClient.setQueryData(
+                queryKeys.currentUser,
+                null
+            );
+
+            queryClient.removeQueries({
+                queryKey: queryKeys.cart,
+            });
+
+            queryClient.removeQueries({
+                queryKey: queryKeys.orders,
+            });
         }
     };
 
@@ -65,7 +76,18 @@ export function AuthProvider({ children }) {
 
     useEffect(() => {
     const handleAuthLogout = () => {
-        queryClient.clear();
+        queryClient.setQueryData(
+            queryKeys.currentUser,
+            null
+        );
+
+        queryClient.removeQueries({
+            queryKey: queryKeys.cart,
+        });
+
+        queryClient.removeQueries({
+            queryKey: queryKeys.orders,
+        });
     };
 
     window.addEventListener("auth:logout", handleAuthLogout);
