@@ -82,7 +82,7 @@ export default function AddressFormDialog({
       }}
     >
       <DialogContent
-        className="sm:max-w-2xl"
+        className="sm:max-w-2xl bg-white rounded-xl shadow-xl border border-slate-200"
         onEscapeKeyDown={(event) => {
           if (isPending) {
             event.preventDefault();
