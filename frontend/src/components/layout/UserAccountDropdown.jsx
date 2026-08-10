@@ -86,7 +86,6 @@ export default function UserAccountDropdown({
 
   const handleLogout = async () => {
     await logout();
-    window.location.assign("/");
   };
 
   const menuItems = isAuthenticated
