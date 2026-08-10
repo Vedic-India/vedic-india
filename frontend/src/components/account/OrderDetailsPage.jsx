@@ -438,8 +438,6 @@ function CancelOrderCard({ orderId, orderStatus }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const cancelOrderMutation = useCancelOrder();
 
-  console.log("CancelOrderCard - orderId:", orderId, "orderStatus:", orderStatus);
-
   if (!["placed", "confirmed"].includes(orderStatus)) {
     return null;
   }
@@ -475,7 +473,7 @@ function CancelOrderCard({ orderId, orderStatus }) {
               : "Cancel Order"}
           </Button>
 
-          <DialogContent>
+          <DialogContent className="bg-white rounded-xl shadow-xl border border-slate-200">
             <DialogHeader>
               <DialogTitle>Cancel this order?</DialogTitle>
 
