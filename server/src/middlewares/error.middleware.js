@@ -6,7 +6,8 @@ const errorHandler = (err,req,res,next) => {
         statusCode: err.statusCode || 500,
         message: err.message || "Internal server error",
         success: false,
-        errors: err.errors || []
+        errors: err.errors || [],
+        code: err.code || undefined
     }
 
     if(process.env.NODE_ENV === "development"){
