@@ -5,6 +5,7 @@ class ApiError extends Error{
         this.data = null
         this.success = false
         this.errors = errors
+        this.name = this.constructor.name
 
         if(stack){
             this.stack = stack
