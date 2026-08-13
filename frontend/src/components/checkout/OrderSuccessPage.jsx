@@ -247,9 +247,6 @@ export default function OrderSuccessPage() {
             <CardContent className="space-y-8 p-6 sm:p-8">
               <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
                 <div className="max-w-2xl space-y-5">
-                  <div className="flex size-18 items-center justify-center rounded-full bg-emerald-50 text-(--color-secondary) shadow-inner">
-                    <HeaderIcon className={headerState.iconClassName} />
-                  </div>
 
                   <div className="space-y-3">
                     <p className="text-sm font-medium uppercase tracking-[0.28em] text-(--color-secondary)">
@@ -267,15 +264,8 @@ export default function OrderSuccessPage() {
                 </div>
 
                 <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5 shadow-sm sm:min-w-72">
-                  <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Status</p>
-                  <div className="mt-3 flex items-center gap-2">
-                    {paymentBadge ? (
-                      <Badge variant={paymentBadge.variant}>{paymentBadge.label}</Badge>
-                    ) : null}
-                    {orderStatusLabel !== "—" ? <Badge variant="outline">{orderStatusLabel}</Badge> : null}
-                  </div>
 
-                  <div className="mt-6 space-y-4 text-sm text-slate-600">
+                  <div className="space-y-4 text-sm text-slate-600">
                     <div>
                       <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Order Number</p>
                       <p className="mt-1 font-semibold text-slate-900">{orderNumber || "—"}</p>
