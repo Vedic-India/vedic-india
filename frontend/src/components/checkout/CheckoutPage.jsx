@@ -532,6 +532,21 @@ export default function CheckoutPage() {
                 return;
               }
 
+              const paymentErrorCode = paymentError?.response?.data?.code;
+
+              if (paymentErrorCode === "PAYMENT_OUT_OF_STOCK") {
+                checkoutSettled = true;
+                setIsPaymentFlowActive(false);
+                toast.error(
+                  paymentError?.response?.data?.message ??
+                    "Some items are no longer in stock. Please update your cart and try again."
+                );
+                router.push(
+                  `/payment-failed?status=out-of-stock&orderId=${encodeURIComponent(orderId)}`
+                );
+                return;
+              }
+
               checkoutSettled = true;
               setIsPaymentFlowActive(false);
               const processingMessage = getPaymentProcessingMessage(paymentError);
@@ -556,6 +571,27 @@ export default function CheckoutPage() {
               setIsPaymentFlowActive(false);
               router.push(`/payment-failed?status=not-completed&orderId=${encodeURIComponent(orderId)}`);
             },
+          },
+          onPaymentFailed: (response) => {
+            if (
+              checkoutSettled ||
+              paymentFlowSessionRef.current !== sessionId ||
+              paymentVerificationStarted
+            ) {
+              return;
+            }
+
+            const failureDescription =
+              response?.error?.description ??
+              response?.error?.reason ??
+              "Your payment could not be completed. Please try again.";
+
+            checkoutSettled = true;
+            setIsPaymentFlowActive(false);
+            toast.error(failureDescription);
+            router.push(
+              `/payment-failed?status=failed&orderId=${encodeURIComponent(orderId)}&reason=${encodeURIComponent(failureDescription)}`
+            );
           },
         });
 
