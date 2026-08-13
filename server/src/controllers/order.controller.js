@@ -596,109 +596,215 @@ const cancelOrder = asyncHandler(async (req, res) => {
     }
 
     const session = await mongoose.startSession();
-    session.startTransaction();
+
+    let order;
+    let shouldRefund = false;
 
     try {
-        const order = await Order.findById(orderId).session(session);
+        await session.withTransaction(async () => {
+            order = await Order.findById(orderId).session(session);
 
-        if (!order) {
-            throw new ApiError(404, "Order not found.");
-        }
-        const isAdmin = req.user.role === "admin";
+            if (!order) {
+                throw new ApiError(404, "Order not found.");
+            }
 
-        if (
-            !isAdmin &&
-            order.user.toString() !== req.user._id.toString()
-        ) {
-            throw new ApiError(403, "Unauthorized.");
-        }
+            const isAdmin = req.user.role === "admin";
 
-        if (order.orderStatus === "cancelled") {
-            throw new ApiError(400, "Order is already cancelled.");
-        }
+            if (
+                !isAdmin &&
+                order.user.toString() !== req.user._id.toString()
+            ) {
+                throw new ApiError(403, "Unauthorized.");
+            }
 
-        if (order.orderStatus === "shipped") {
-            throw new ApiError(
-                400,
-                "Shipped orders cannot be cancelled."
-            );
-        }
+            if (order.orderStatus === "cancelled") {
+                throw new ApiError(400, "Order is already cancelled.");
+            }
 
-        if (order.orderStatus === "delivered") {
-            throw new ApiError(
-                400,
-                "Delivered orders cannot be cancelled."
-            );
-        }
+            if (order.orderStatus === "shipped") {
+                throw new ApiError(
+                    400,
+                    "Shipped orders cannot be cancelled."
+                );
+            }
 
-        // Restore stock
-        for (const item of order.items) {
-            await Product.updateOne(
-                {
-                    _id: item.product,
-                },
-                {
-                    $inc: {
-                        stock: item.quantity,
-                    },
-                },
-                { session }
-            );
-        }
+            if (order.orderStatus === "delivered") {
+                throw new ApiError(
+                    400,
+                    "Delivered orders cannot be cancelled."
+                );
+            }
 
-        order.orderStatus = "cancelled";
-        order.cancelledAt = new Date();
+            // Prevent two cancellation/refund requests from running
+            // against the same paid Razorpay order.
+            if (order.paymentInfo.refundProcessing) {
+                throw new ApiError(
+                    409,
+                    "Order cancellation/refund is already being processed."
+                );
+            }
 
-        if (
-            order.paymentInfo.method === "razorpay" &&
-            order.paymentInfo.status === "paid"
-        ) {
+            shouldRefund =
+                order.paymentInfo.method === "razorpay" &&
+                order.paymentInfo.status === "paid";
+
+            /*
+             * For Razorpay-paid orders:
+             *
+             * DO NOT restore stock here.
+             * DO NOT mark payment as refunded here.
+             *
+             * The refund.processed webhook will do that after
+             * Razorpay confirms the refund.
+             */
+            if (shouldRefund) {
+                order.paymentInfo.refundProcessing = true;
+            } else {
+                /*
+                 * COD / unpaid orders don't need a Razorpay refund,
+                 * so stock can be restored immediately.
+                 */
+                for (const item of order.items) {
+                    const result = await Product.updateOne(
+                        {
+                            _id: item.product,
+                        },
+                        {
+                            $inc: {
+                                stock: item.quantity,
+                            },
+                        },
+                        { session }
+                    );
+
+                    if (result.modifiedCount === 0) {
+                        throw new ApiError(
+                            500,
+                            `Unable to restore stock for ${item.name}.`
+                        );
+                    }
+                }
+            }
+
+            order.orderStatus = "cancelled";
+            order.cancelledAt = new Date();
+
+            await order.save({ session });
+        });
+    } finally {
+        await session.endSession();
+    }
+
+    /*
+     * Razorpay refund is intentionally performed AFTER the
+     * MongoDB transaction has committed.
+     */
+    if (shouldRefund) {
+        try {
             const refund = await razorpay.payments.refund(
                 order.paymentInfo.razorpayPaymentId,
                 {
                     amount: Math.round(order.totalAmount * 100),
+                    notes: {
+                        orderNumber: order.orderNumber,
+                        reason: "Order cancelled by user/admin",
+                    },
                 }
             );
 
+            console.log("Refund requested:", refund.id);
             console.log("Refund status:", refund.status);
 
-            order.paymentInfo.status = "refunded";
-            order.paymentInfo.refundId = refund.id;
-            order.paymentInfo.refundedAt = new Date();
+            /*
+             * Do NOT mark the order as refunded here.
+             *
+             * refund.processed webhook will eventually call:
+             *
+             * processRefundedOrder()
+             *
+             * which will:
+             * - restore stock
+             * - set payment status = refunded
+             * - save refund ID
+             * - save refundedAt
+             * - set refundProcessing = false
+             */
+        } catch (refundError) {
+            console.error(
+                "Failed to initiate Razorpay refund:",
+                refundError
+            );
+
+            /*
+             * Refund request failed, so release the processing lock.
+             * The payment remains "paid", because no successful refund
+             * has been confirmed.
+             */
+            try {
+                await Order.updateOne(
+                    {
+                        _id: order._id,
+                        "paymentInfo.refundProcessing": true,
+                    },
+                    {
+                        $set: {
+                            "paymentInfo.refundProcessing": false,
+                            "paymentInfo.failureReason":
+                                refundError?.description ||
+                                refundError?.message ||
+                                "Unable to initiate refund.",
+                        },
+                    }
+                );
+            } catch (resetError) {
+                console.error(
+                    "Failed to reset refund processing state:",
+                    resetError
+                );
+            }
+
+            throw new ApiError(
+                500,
+                "Order was cancelled, but the refund could not be initiated. Please contact support."
+            );
         }
+    }
 
-        await order.save({ session });
-
-        await session.commitTransaction();
-
+    /*
+     * Send cancellation email after the cancellation transaction
+     * has successfully committed.
+     */
+    try {
         const user = await User.findById(order.user).select(
             "name email"
         );
 
-        if (user) {
-            try {
-                await sendEmail({
-                    to: user.email,
-                    subject: `Your Order #${order.orderNumber} has been Cancelled`,
-                    html: orderCancelledEmail({
-                        user,
-                        order,
-                    }),
-                });
-            } catch (error) {
-                console.error(error);
-            }
+        if (user?.email) {
+            await sendEmail({
+                to: user.email,
+                subject: `Your Order #${order.orderNumber} has been Cancelled`,
+                html: orderCancelledEmail({
+                    user,
+                    order,
+                }),
+            });
         }
-
-        return res.status(200).json(
-            new ApiResponse(200, order, "Order cancelled successfully.")
-        );
     } catch (error) {
-        await session.abortTransaction();
-        throw error;
-    } finally {
-        session.endSession();
+        console.error(
+            "Failed to send order cancellation email:",
+            error
+        );
     }
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            order,
+            shouldRefund
+                ? "Order cancelled successfully. Your refund is being processed."
+                : "Order cancelled successfully."
+        )
+    );
 });
 
 export { 
