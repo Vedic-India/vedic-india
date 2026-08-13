@@ -181,30 +181,6 @@ function SummaryCard({ order }) {
             </div>
           </div>
         </div>
-
-        <Separator />
-
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Payment Method</p>
-            <p className="mt-2 text-sm font-medium capitalize text-slate-900">
-              {order.paymentInfo?.method || "—"}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Estimated Delivery</p>
-            <p className="mt-2 text-sm font-medium text-slate-900">
-              {order.estimatedDeliveryAt
-                ? formatDate(order.estimatedDeliveryAt)
-                : order.deliveredAt
-                  ? formatDate(order.deliveredAt)
-                  : order.shippedAt
-                    ? "To be updated"
-                    : "Not available"}
-            </p>
-          </div>
-        </div>
       </div>
     </SectionCard>
   );
