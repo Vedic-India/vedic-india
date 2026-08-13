@@ -93,7 +93,7 @@ const handleFailedPayment = async ({
                 );
 
                 if (user?.email) {
-                    await sendEmail({
+                    sendEmail({
                         to: user.email,
                         subject: `Refund Initiated for Order #${updatedOrder.orderNumber}`,
                         html: paymentFailedEmail({
@@ -101,6 +101,8 @@ const handleFailedPayment = async ({
                             order: updatedOrder,
                             reason,
                         }),
+                    }).catch((error) => {
+                        console.error("Failed to send refund email:", error);
                     });
                 }
             } catch (emailError) {
@@ -276,10 +278,12 @@ const completePaidOrder = async ({
             );
 
             if (user?.email) {
-                await sendEmail({
+                sendEmail({
                     to: user.email,
                     subject: `Your Vedic India Order is Placed (#${completion.order.orderNumber})`,
                     html: orderPlacedEmail({ user, order: completion.order }),
+                }).catch((error) => {
+                    console.error("Failed to send order confirmation email:", error);
                 });
             }
         } catch (error) {

@@ -182,18 +182,16 @@ const createOrder = asyncHandler(async (req, res) => {
         await session.commitTransaction();
 
         if (paymentMethod === "cod") {
-            try {
-                await sendEmail({
-                    to: user.email,
-                    subject: `Your Vedic India Order is Confirmed (#${order.orderNumber})`,
-                    html: orderPlacedEmail({
-                        user,
-                        order,
-                    }),
-                });
-            } catch (error) {
+            sendEmail({
+                to: user.email,
+                subject: `Your Vedic India Order is Confirmed (#${order.orderNumber})`,
+                html: orderPlacedEmail({
+                    user,
+                    order,
+                }),
+            }).catch((error) => {
                 console.error("Failed to send confirmation email:",error);
-            }
+            })
         }
 
         return res.status(201).json(
@@ -511,35 +509,41 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
         if (user) {
             switch (orderStatus) {
                 case "shipped":
-                    await sendEmail({
+                    sendEmail({
                         to: user.email,
                         subject: `Your Order #${order.orderNumber} has been Shipped`,
                         html: orderShippedEmail({
                             user,
                             order,
                         }),
+                    }).catch((error) => {
+                        console.error("Failed to send order shipped email:", error);
                     });
                     break;
 
                 case "delivered":
-                    await sendEmail({
+                    sendEmail({
                         to: user.email,
                         subject: `Your Order #${order.orderNumber} has been Delivered`,
                         html: orderDeliveredEmail({
                             user,
                             order,
                         }),
+                    }).catch((error) => {
+                        console.error("Failed to send order delivered email:", error);
                     });
                     break;
 
                 case "cancelled":
-                    await sendEmail({
+                    sendEmail({
                         to: user.email,
                         subject: `Your Order #${order.orderNumber} has been Cancelled`,
                         html: orderCancelledEmail({
                             user,
                             order,
                         }),
+                    }).catch((error) => {
+                        console.error("Failed to send order cancelled email:", error);
                     });
                     break;
             }
@@ -780,13 +784,15 @@ const cancelOrder = asyncHandler(async (req, res) => {
         );
 
         if (user?.email) {
-            await sendEmail({
+            sendEmail({
                 to: user.email,
                 subject: `Your Order #${order.orderNumber} has been Cancelled`,
                 html: orderCancelledEmail({
                     user,
                     order,
                 }),
+            }).catch((error) => {
+                console.error("Failed to send order cancellation email:", error);
             });
         }
     } catch (error) {
