@@ -13,6 +13,7 @@ class StockUnavailableError extends ApiError {
     constructor(message) {
         super(400, message);
         this.name = "StockUnavailableError";
+        this.code = "PAYMENT_OUT_OF_STOCK";
     }
 }
 
@@ -249,11 +250,18 @@ const completePaidOrder = async ({
         });
     } catch (error) {
         if (error instanceof StockUnavailableError && failedOrder) {
-            await handleFailedPayment({
-                order: failedOrder,
-                payment,
-                reason: error.message,
-            });
+            try {
+                await handleFailedPayment({
+                    order: failedOrder,
+                    payment,
+                    reason: error.message,
+                });
+            } catch (refundError) {
+                console.error(
+                    "Failed to refund payment after stock failure:",
+                    refundError
+                );
+            }
         }
 
         throw error;
