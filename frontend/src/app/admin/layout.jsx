@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import Container from "@/components/layout/Container";
 import PageLoader from "@/components/layout/PageLoader";
 import { useAuth } from "@/context/AuthContext";
 
-export default function AdminLayout({ children }) {
+function AdminLayoutContent({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -36,5 +36,13 @@ export default function AdminLayout({ children }) {
     <Container className="py-10 sm:py-12 lg:py-14">
       {children}
     </Container>
+  );
+}
+
+export default function AdminLayout({ children }) {
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <AdminLayoutContent>{children}</AdminLayoutContent>
+    </Suspense>
   );
 }

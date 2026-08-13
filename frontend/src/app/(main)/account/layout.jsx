@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import Container from "@/components/layout/Container";
 import PageLoader from "@/components/layout/PageLoader";
 import { useAuth } from "@/context/AuthContext";
 
-export default function AccountLayout({ children }) {
+function AccountLayoutContent({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -32,5 +32,13 @@ export default function AccountLayout({ children }) {
         {children}
       </div>
     </Container>
+  );
+}
+
+export default function AccountLayout({ children }) {
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <AccountLayoutContent>{children}</AccountLayoutContent>
+    </Suspense>
   );
 }

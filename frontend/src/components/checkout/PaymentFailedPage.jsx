@@ -1,7 +1,7 @@
 "use client";
 
+import { Suspense, useEffect } from "react";
 import Link from "next/link";
-import { useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { AlertCircle, Info, ShoppingBag } from "lucide-react";
 
@@ -180,6 +180,14 @@ function UnavailableState() {
 }
 
 export default function PaymentFailedPage() {
+  return (
+    <Suspense fallback={<LoadingBlock />}>
+      <PaymentFailedPageContent />
+    </Suspense>
+  );
+}
+
+function PaymentFailedPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 

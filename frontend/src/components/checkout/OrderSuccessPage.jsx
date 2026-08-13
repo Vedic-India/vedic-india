@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { AlertCircle, CheckCircle2, Loader2, Package, ShoppingBag } from "lucide-react";
@@ -175,6 +176,14 @@ function UnavailableState({ title, heading, description, message, orderId }) {
 }
 
 export default function OrderSuccessPage() {
+  return (
+    <Suspense fallback={<section className="bg-slate-50 pt-30 pb-14"><Container><SuccessSkeleton /></Container></section>}>
+      <OrderSuccessPageContent />
+    </Suspense>
+  );
+}
+
+function OrderSuccessPageContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId") || "";
 

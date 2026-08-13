@@ -1,7 +1,7 @@
 "use client";
 
+import { Suspense, useMemo } from "react";
 import Link from "next/link";
-import { useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle2, Loader2, ShoppingBag } from "lucide-react";
 
@@ -22,6 +22,14 @@ function LoadingBlock() {
 }
 
 export default function PaymentProcessingPage() {
+  return (
+    <Suspense fallback={<LoadingBlock />}>
+      <PaymentProcessingPageContent />
+    </Suspense>
+  );
+}
+
+function PaymentProcessingPageContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId") || "";
   const reason = searchParams.get("reason") || "";
