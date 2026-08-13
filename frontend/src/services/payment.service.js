@@ -38,6 +38,7 @@ export const openRazorpayCheckout = async ({
   themeColor,
   handler,
   modal,
+  onPaymentFailed,
 }) => {
   const loaded = await loadRazorpayScript();
 
@@ -83,6 +84,10 @@ export const openRazorpayCheckout = async ({
   }
 
   const razorpay = new window.Razorpay(options);
+
+  if (typeof onPaymentFailed === "function") {
+    razorpay.on("payment.failed", onPaymentFailed);
+  }
 
   razorpay.open();
 
