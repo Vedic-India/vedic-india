@@ -1,40 +1,31 @@
-import nodemailer from "nodemailer";
+import brevo from "@getbrevo/brevo";
 
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT),
-    secure: false,
+const apiInstance = new brevo.TransactionalEmailsApi();
 
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-    },
+apiInstance.setApiKey(
+    brevo.TransactionalEmailsApiApiKeys.apiKey,
+    process.env.BREVO_API_KEY
+);
 
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 30000,
-});
+const sendEmail = async ({ to, subject, html }) => {
+    const sendSmtpEmail = new brevo.SendSmtpEmail();
 
-transporter.verify()
-    .then(() => {
-        console.log("✅ Brevo SMTP connection successful");
-    })
-    .catch((error) => {
-        console.error("❌ Brevo SMTP connection failed:");
-        console.error(error);
-    });
+    sendSmtpEmail.subject = subject;
 
-const sendEmail = async ({
-    to,
-    subject,
-    html
-}) => {
-    await transporter.sendMail({
-        from: `"Vedic India" <${process.env.SMTP_FROM}>`,
-        to,
-        subject,
-        html
-    });
+    sendSmtpEmail.htmlContent = html;
+
+    sendSmtpEmail.sender = {
+        name: process.env.BREVO_FROM_NAME || "Vedic India",
+        email: process.env.BREVO_FROM_EMAIL,
+    };
+
+    sendSmtpEmail.to = [
+        {
+            email: to,
+        },
+    ];
+
+    return await apiInstance.sendTransacEmail(sendSmtpEmail);
 };
 
 export { sendEmail };
