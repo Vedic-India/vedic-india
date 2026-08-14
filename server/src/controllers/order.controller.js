@@ -219,6 +219,8 @@ const createOrder = asyncHandler(async (req, res) => {
 const verifyPayment = asyncHandler(async (req, res) => {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
+    throw new ApiError(400, "Payment verification is currently disabled for testing purposes.");
+
     if ( !razorpay_order_id || !razorpay_payment_id || !razorpay_signature ) {
         throw new ApiError(400, "Missing payment details.");
     }
