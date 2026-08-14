@@ -1,7 +1,9 @@
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
@@ -10,6 +12,15 @@ const transporter = nodemailer.createTransport({
     greetingTimeout: 10000,
     socketTimeout: 30000,
 });
+
+transporter.verify()
+    .then(() => {
+        console.log("✅ Gmail SMTP connection successful");
+    })
+    .catch((error) => {
+        console.error("❌ Gmail SMTP connection failed:");
+        console.error(error);
+    });
 
 const sendEmail = async ({
     to,
