@@ -1,31 +1,35 @@
-import brevo from "@getbrevo/brevo";
-
-const apiInstance = new brevo.TransactionalEmailsApi();
-
-apiInstance.setApiKey(
-    brevo.TransactionalEmailsApiApiKeys.apiKey,
-    process.env.BREVO_API_KEY
-);
+import axios from "axios";
 
 const sendEmail = async ({ to, subject, html }) => {
-    const sendSmtpEmail = new brevo.SendSmtpEmail();
-
-    sendSmtpEmail.subject = subject;
-
-    sendSmtpEmail.htmlContent = html;
-
-    sendSmtpEmail.sender = {
-        name: process.env.BREVO_FROM_NAME || "Vedic India",
-        email: process.env.BREVO_FROM_EMAIL,
-    };
-
-    sendSmtpEmail.to = [
+    const response = await axios.post(
+        "https://api.brevo.com/v3/smtp/email",
         {
-            email: to,
-        },
-    ];
+            sender: {
+                name: process.env.BREVO_FROM_NAME || "Vedic India",
+                email: process.env.BREVO_FROM_EMAIL,
+            },
 
-    return await apiInstance.sendTransacEmail(sendSmtpEmail);
+            to: [
+                {
+                    email: to,
+                },
+            ],
+
+            subject,
+            htmlContent: html,
+        },
+        {
+            headers: {
+                accept: "application/json",
+                "api-key": process.env.BREVO_API_KEY,
+                "content-type": "application/json",
+            },
+
+            timeout: 10000,
+        }
+    );
+
+    return response.data;
 };
 
 export { sendEmail };
