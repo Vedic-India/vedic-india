@@ -44,26 +44,26 @@ export default function LoginForm({ callbackUrl = "/" }) {
   };
 
   return (
-    <div className="w-full max-w-md rounded-3xl bg-white shadow-xl p-8">
-
-      <h2 className="text-3xl font-bold text-center text-slate-800">
+    <div className="w-full min-w-0 max-w-md rounded-3xl bg-white p-5 shadow-xl sm:p-8">
+      <h2 className="text-center text-3xl font-bold text-slate-800">
         Welcome Back
       </h2>
 
-      <p className="text-center text-gray-500 mt-2">
+      <p className="mt-2 text-center text-gray-500">
         Login to continue
       </p>
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="mt-8 space-y-5"
+        className="mt-8 w-full min-w-0 space-y-5"
       >
-        <div>
+        {/* Email */}
+        <div className="min-w-0">
           <label className="text-sm font-medium text-gray-700">
             Email Address
           </label>
 
-          <div className="mt-2 relative">
+          <div className="relative mt-2 min-w-0">
             <Mail
               size={18}
               className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
@@ -73,9 +73,7 @@ export default function LoginForm({ callbackUrl = "/" }) {
               {...register("email")}
               type="email"
               placeholder="Enter your email"
-              className={`w-full rounded-xl border py-3 pl-11 pr-4 outline-none transition
-
-              ${
+              className={`block w-full min-w-0 rounded-xl border py-3 pl-11 pr-4 outline-none transition ${
                 errors.email
                   ? "border-red-500"
                   : "border-gray-300 focus:border-green-600"
@@ -90,21 +88,22 @@ export default function LoginForm({ callbackUrl = "/" }) {
           )}
         </div>
 
-        <div>
-          <div className="flex justify-between">
-            <label className="text-sm font-medium text-gray-700">
+        {/* Password */}
+        <div className="min-w-0">
+          <div className="flex min-w-0 items-center justify-between gap-3">
+            <label className="shrink-0 text-sm font-medium text-gray-700">
               Password
             </label>
 
             <Link
               href="/forgot-password"
-              className="text-sm text-green-700 hover:underline"
+              className="shrink-0 text-right text-sm text-green-700 hover:underline"
             >
               Forgot Password?
             </Link>
           </div>
 
-          <div className="mt-2 relative">
+          <div className="relative mt-2 min-w-0">
             <Lock
               size={18}
               className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
@@ -114,9 +113,7 @@ export default function LoginForm({ callbackUrl = "/" }) {
               {...register("password")}
               type="password"
               placeholder="Enter your password"
-              className={`w-full rounded-xl border py-3 pl-11 pr-4 outline-none transition
-
-              ${
+              className={`block w-full min-w-0 rounded-xl border py-3 pl-11 pr-4 outline-none transition ${
                 errors.password
                   ? "border-red-500"
                   : "border-gray-300 focus:border-green-600"
@@ -131,29 +128,33 @@ export default function LoginForm({ callbackUrl = "/" }) {
           )}
         </div>
 
+        {/* Login button */}
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full rounded-xl bg-linear-to-r from-green-700 to-green-600 py-3 text-white font-semibold transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+          className="w-full rounded-xl bg-linear-to-r from-green-700 to-green-600 py-3 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {isSubmitting ? "Logging in..." : "Login"}
         </button>
       </form>
 
-      <div className="my-6 flex items-center">
-        <div className="flex-1 border-t" />
+      {/* Divider */}
+      <div className="my-6 flex min-w-0 items-center">
+        <div className="min-w-0 flex-1 border-t" />
 
-        <span className="mx-3 text-gray-400 text-sm">
+        <span className="mx-3 shrink-0 text-sm text-gray-400">
           OR
         </span>
 
-        <div className="flex-1 border-t" />
+        <div className="min-w-0 flex-1 border-t" />
       </div>
 
-      <div className="flex justify-center">
+      {/* Google */}
+      <div className="w-full min-w-0">
         <GoogleAuthButton callbackUrl={callbackUrl} />
       </div>
 
+      {/* Signup */}
       <p className="mt-7 text-center text-gray-500">
         Don&apos;t have an account?{" "}
         <Link

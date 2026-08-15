@@ -27,7 +27,7 @@ function AccountLayoutContent({ children }) {
   }
 
   return (
-    <Container className="py-10 sm:py-14 lg:py-16">
+    <Container className="py-16">
       <div className="mx-auto max-w-5xl">
         {children}
       </div>
