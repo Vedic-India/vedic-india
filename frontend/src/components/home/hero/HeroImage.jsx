@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 
+const MotionImage = motion(Image);
+
 export default function HeroImage() {
   return (
     <div className="relative flex w-full items-center justify-center pt-10 ml-10">
@@ -10,6 +12,7 @@ export default function HeroImage() {
       {/* Hero Image Container */}
       <div className="relative h-[570px] w-[730px] bg-transparent">
 
+        {/* Main Hero Image */}
         <Image
           src="/hero3.png"
           alt="Hero"
@@ -19,10 +22,12 @@ export default function HeroImage() {
         />
 
         {/* H+ Bubble */}
-        <motion.img
+        <MotionImage
           src="/h.png"
           alt="H+"
-          className="absolute left-[60px] top-[100px] z-20 h-[85px] w-[130px]"
+          width={130}
+          height={85}
+          className="absolute left-[60px] top-[100px] z-20"
           animate={{ y: [-8, 8, -8] }}
           transition={{
             duration: 4,
@@ -31,11 +36,13 @@ export default function HeroImage() {
           }}
         />
 
-        {/* OH Bubble */}
-        <motion.img
+        {/* OH- Bubble */}
+        <MotionImage
           src="/oh.png"
           alt="OH-"
-          className="absolute left-[150px] top-[220px] z-20 h-[85px] w-[130px]"
+          width={130}
+          height={85}
+          className="absolute left-[150px] top-[220px] z-20"
           animate={{ y: [8, -8, 8] }}
           transition={{
             duration: 4.5,
@@ -44,11 +51,13 @@ export default function HeroImage() {
           }}
         />
 
-        {/* Mg Bubble */}
-        <motion.img
+        {/* Mg+ Bubble */}
+        <MotionImage
           src="/mg+.png"
-          alt="Mg2+"
-          className="absolute right-[80px] top-[90px] z-20 h-[85px] w-[130px]"
+          alt="Mg+"
+          width={130}
+          height={85}
+          className="absolute right-[80px] top-[90px] z-20"
           animate={{ y: [-8, 8, -8] }}
           transition={{
             duration: 5,
@@ -57,11 +66,13 @@ export default function HeroImage() {
           }}
         />
 
-        {/* Ca Bubble */}
-        <motion.img
+        {/* Ca2+ Bubble */}
+        <MotionImage
           src="/ca+.png"
           alt="Ca2+"
-          className="absolute right-[170px] top-[230px] z-20 h-[85px] w-[130px]"
+          width={130}
+          height={85}
+          className="absolute right-[170px] top-[230px] z-20"
           animate={{ y: [8, -8, 8] }}
           transition={{
             duration: 6,
@@ -71,7 +82,6 @@ export default function HeroImage() {
         />
 
       </div>
-
     </div>
   );
 }
