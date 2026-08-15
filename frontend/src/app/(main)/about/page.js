@@ -5,7 +5,7 @@ import AboutStory from "@/components/about/AboutStory";
 export default function AboutPage() {
   return (
     <>
-      <main>
+      <main className="pt-[104px] lg:pt-[80px]">
         <AboutStory />
       </main>
     </>
