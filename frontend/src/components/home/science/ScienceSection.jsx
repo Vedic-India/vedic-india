@@ -18,22 +18,41 @@ export default function ScienceSection() {
           relative mx-auto overflow-hidden
           max-w-[1650px]
 
-          lg:flex lg:min-h-[520px]
-          xl:block xl:h-[520px]
+          lg:flex
+          lg:min-h-[500px]
+
+          xl:relative
+          xl:block
+          xl:h-[520px]
         "
       >
         {/* ================= LEFT CONTENT ================= */}
         <div
           className="
-            relative z-10 flex flex-col justify-center
-            px-7 pt-12 pb-2
+            relative z-10
+            flex flex-col justify-center
 
-            sm:px-10 sm:pt-14 sm:pb-3
+            px-7
+            pt-12
+            pb-2
 
-            lg:w-[45%] lg:px-10 lg:py-12
+            sm:px-10
+            sm:pt-14
+            sm:pb-3
 
-            xl:h-full xl:w-[38%]
-            xl:px-14 xl:py-0 xl:pr-6
+            lg:w-1/2
+            lg:px-8
+            lg:py-10
+            lg:pr-6
+
+            xl:absolute
+            xl:left-0
+            xl:top-0
+            xl:h-full
+            xl:w-[38%]
+            xl:px-14
+            xl:py-0
+            xl:pr-6
           "
         >
           {/* Badge */}
@@ -48,7 +67,20 @@ export default function ScienceSection() {
               <path d="M20.7 3.3C16.7 2.8 12.4 4 9.3 7.1C6.8 9.6 5.6 12.8 5.8 16C2.9 15.7 1 13.6 1 10.6C1 5.4 6.5 1 13.2 1C16.2 1 18.8 1.8 20.7 3.3ZM22 4.8C22 12.8 16.3 19.8 9.4 23C10.1 20.6 11.5 18.4 13.4 16.5C16.5 13.4 20.2 12.2 22 12.2V4.8Z" />
             </svg>
 
-            <span className="text-[13px] font-semibold uppercase tracking-[0.16em] text-[#BED7C8] sm:text-[14px] xl:text-[15px] xl:tracking-[0.18em]">
+            <span
+              className="
+                text-[13px]
+                font-semibold
+                uppercase
+                tracking-[0.16em]
+                text-[#BED7C8]
+
+                sm:text-[14px]
+
+                xl:text-[15px]
+                xl:tracking-[0.18em]
+              "
+            >
               WHY VEDIC INDIA?
             </span>
           </div>
@@ -65,7 +97,9 @@ export default function ScienceSection() {
 
               sm:text-[46px]
 
-              lg:text-[48px]
+              lg:max-w-[470px]
+              lg:text-[42px]
+              lg:tracking-[-1.5px]
 
               xl:max-w-none
               xl:whitespace-nowrap
@@ -90,10 +124,13 @@ export default function ScienceSection() {
 
               sm:text-[17px]
 
-              lg:mt-7
-              lg:text-[17px]
+              lg:mt-6
+              lg:max-w-[440px]
+              lg:text-[16px]
+              lg:leading-[1.7]
 
               xl:mt-9
+              xl:max-w-[520px]
               xl:text-[18px]
               xl:leading-[1.85]
             "
@@ -107,8 +144,7 @@ export default function ScienceSection() {
           <Link
             href="/benefits"
             className="
-              mt-6
-              mb-2
+              mt-8
               flex h-[52px] w-[190px]
               items-center justify-center gap-3
               rounded-full
@@ -116,10 +152,13 @@ export default function ScienceSection() {
               text-[17px]
               font-semibold
               text-white
-              transition-all duration-300
+              transition-all
+              duration-300
               hover:bg-[#089554]
 
-              sm:mt-7
+              lg:mt-7
+              lg:h-[54px]
+              lg:w-[200px]
 
               xl:mt-10
               xl:h-[60px]
@@ -141,12 +180,13 @@ export default function ScienceSection() {
 
             sm:h-[300px]
 
-            lg:absolute
-            lg:right-0
-            lg:top-0
-            lg:h-full
-            lg:w-[58%]
+            lg:h-[500px]
+            lg:w-1/2
 
+            xl:absolute
+            xl:right-0
+            xl:top-0
+            xl:h-full
             xl:w-[66%]
           "
         >
@@ -157,14 +197,17 @@ export default function ScienceSection() {
             priority
             sizes="
               (max-width: 1023px) 100vw,
-              (max-width: 1279px) 58vw,
+              (max-width: 1279px) 50vw,
               66vw
             "
             className="
-              object-cover
+              object-contain
               object-center
+
               lg:object-contain
-              lg:object-right
+              lg:object-center
+
+              xl:object-right
             "
           />
         </div>
@@ -177,10 +220,8 @@ export default function ScienceSection() {
             mx-auto
             grid
             grid-cols-2
-
             gap-x-5
             gap-y-6
-
             px-5
             py-6
 

@@ -48,7 +48,7 @@ export default function HeroImage() {
           width={130}
           height={85}
           className="
-            absolute left-[115px] top-[110px] z-20
+            absolute left-[100px] top-[110px] z-20
             !h-auto !w-[58px]
             lg:left-[150px] lg:top-[220px]
             lg:!w-[130px]
@@ -88,7 +88,7 @@ export default function HeroImage() {
           width={130}
           height={85}
           className="
-            absolute right-[105px] top-[115px] z-30
+            absolute right-[100px] top-[115px] z-30
             !h-auto !w-[58px]
             lg:right-[170px] lg:top-[215px]
             lg:!w-[130px]
