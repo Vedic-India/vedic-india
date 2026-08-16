@@ -28,17 +28,26 @@ function DropdownMenuContent({
         className={cn(
           `
             z-50
+
+            /* Mobile — keep current size */
             w-[180px]
             min-w-[180px]
 
-            sm:w-[240px]
-            sm:min-w-[240px]
+            /* Tablet */
+            sm:w-[280px]
+            sm:min-w-[280px]
 
-            md:w-[280px]
-            md:min-w-[280px]
+            /* Larger tablet */
+            md:w-[320px]
+            md:min-w-[320px]
 
-            lg:w-[320px]
-            lg:min-w-[320px]
+            /* Desktop */
+            lg:w-[360px]
+            lg:min-w-[360px]
+
+            /* Large desktop */
+            xl:w-[380px]
+            xl:min-w-[380px]
 
             overflow-hidden
             rounded-2xl

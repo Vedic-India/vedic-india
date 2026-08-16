@@ -128,13 +128,32 @@ export default function UserAccountDropdown({
         avoidCollisions
         className="
           !z-[100]
+
+          /* Mobile */
           !w-[180px]
           !min-w-[180px]
+
+          /* Small tablets */
+          sm:!w-[220px]
+          sm:!min-w-[220px]
+
+          /* Tablets */
+          md:!w-[240px]
+          md:!min-w-[240px]
+
+          /* Desktop */
+          lg:!w-[280px]
+          lg:!min-w-[280px]
+
+          /* Large desktop */
+          xl:!w-[300px]
+          xl:!min-w-[300px]
+
           !rounded-2xl
           !border
           !border-slate-200
           !bg-[#F6FAFF]
-          !p-1.5
+          !p-2
           !text-slate-700
           !shadow-[0_10px_30px_rgba(15,23,42,0.12)]
         "
