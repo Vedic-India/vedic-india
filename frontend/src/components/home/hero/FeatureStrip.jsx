@@ -36,7 +36,7 @@ const items = [
 
 export default function FeatureStrip() {
   return (
-    <section className="w-full border-y border-[#E8EEF5] bg-white">
+    <section className="m-0 w-full border-y border-[#E8EEF5] bg-white">
       <div className="mx-auto max-w-[1400px]">
         <div className="grid grid-cols-2 lg:grid-cols-5">
           {items.map((item, index) => {
@@ -45,7 +45,11 @@ export default function FeatureStrip() {
             return (
               <div
                 key={item.title}
-                className={`flex items-center justify-center gap-5 px-8 py-8 ${
+                className={`${
+                  index === 0
+                    ? "hidden lg:flex"
+                    : "flex"
+                } items-center justify-center gap-5 px-8 py-8 ${
                   index !== items.length - 1
                     ? "border-r border-[#E8EEF5]"
                     : ""
