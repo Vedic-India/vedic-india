@@ -13,7 +13,12 @@ function DropdownMenuTrigger({ ...props }) {
   return <DropdownMenuPrimitive.Trigger data-slot="dropdown-menu-trigger" {...props} />;
 }
 
-function DropdownMenuContent({ className, sideOffset = 8, align = "end", ...props }) {
+function DropdownMenuContent({
+  className,
+  sideOffset = 8,
+  align = "end",
+  ...props
+}) {
   return (
     <DropdownMenuPrimitive.Portal>
       <DropdownMenuPrimitive.Content
@@ -21,7 +26,43 @@ function DropdownMenuContent({ className, sideOffset = 8, align = "end", ...prop
         sideOffset={sideOffset}
         align={align}
         className={cn(
-          "z-50 min-w-60 overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 text-slate-950 shadow-[0_28px_70px_-28px_rgba(15,23,42,0.45)] backdrop-blur-xl outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50",
+          `
+            z-50
+            w-[180px]
+            min-w-[180px]
+
+            sm:w-[240px]
+            sm:min-w-[240px]
+
+            md:w-[280px]
+            md:min-w-[280px]
+
+            lg:w-[320px]
+            lg:min-w-[320px]
+
+            overflow-hidden
+            rounded-2xl
+            border
+            border-slate-200
+            bg-[#F6FAFF]
+            p-2
+            text-slate-950
+            shadow-[0_28px_70px_-28px_rgba(15,23,42,0.25)]
+            backdrop-blur-xl
+            outline-none
+
+            data-[state=open]:animate-in
+            data-[state=closed]:animate-out
+            data-[state=closed]:fade-out-0
+            data-[state=open]:fade-in-0
+            data-[state=closed]:zoom-out-95
+            data-[state=open]:zoom-in-95
+
+            data-[side=bottom]:slide-in-from-top-2
+            data-[side=left]:slide-in-from-right-2
+            data-[side=right]:slide-in-from-left-2
+            data-[side=top]:slide-in-from-bottom-2
+          `,
           className
         )}
         {...props}

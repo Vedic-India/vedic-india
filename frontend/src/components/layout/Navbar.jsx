@@ -62,13 +62,14 @@ export default function Navbar() {
         <Container>
           <div className="flex h-22 items-center justify-between">
             {/* Logo */}
-            <Link href="/">
+            <Link href="/" className="shrink-0">
               <Image
                 src="/logo1.png"
                 alt="Vedic India"
                 width={170}
                 height={62}
                 priority
+                className="h-auto w-[145px] sm:w-[160px] lg:w-[170px]"
               />
             </Link>
 
@@ -100,19 +101,36 @@ export default function Navbar() {
               <Link
                 href="/cart"
                 className="relative transition hover:scale-105 hover:text-(--color-secondary)"
+                aria-label="Shopping cart"
               >
                 <ShoppingCart size={22} />
               </Link>
             </div>
 
-            {/* Mobile Menu Button */}
-            <button
-              className="lg:hidden"
-              onClick={() => setMobileMenu(true)}
-              aria-label="Open menu"
-            >
-              <Menu size={28} />
-            </button>
+            {/* Mobile Actions */}
+            <div className="flex items-center gap-4 lg:hidden">
+              {/* User */}
+              <UserAccountDropdown />
+
+              {/* Cart */}
+              <Link
+                href="/cart"
+                className="relative transition hover:scale-105 hover:text-(--color-secondary)"
+                aria-label="Shopping cart"
+              >
+                <ShoppingCart size={22} />
+              </Link>
+
+              {/* Menu */}
+              <button
+                type="button"
+                onClick={() => setMobileMenu(true)}
+                aria-label="Open menu"
+                className="transition hover:text-(--color-secondary)"
+              >
+                <Menu size={28} />
+              </button>
+            </div>
           </div>
         </Container>
       </motion.header>
@@ -123,7 +141,7 @@ export default function Navbar() {
           <>
             {/* Overlay */}
             <motion.div
-              className="fixed inset-0 z-50 bg-black/40"
+              className="fixed inset-0 z-[60] bg-black/40"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -132,22 +150,26 @@ export default function Navbar() {
 
             {/* Drawer */}
             <motion.div
-              className="fixed left-0 top-0 z-50 h-full w-80 bg-white p-8"
+              className="fixed left-0 top-0 z-[70] h-dvh w-[min(20rem,88vw)] bg-white px-8 py-8 shadow-xl"
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
             >
+              {/* Close */}
               <div className="flex justify-end">
                 <button
+                  type="button"
                   onClick={() => setMobileMenu(false)}
                   aria-label="Close menu"
+                  className="transition hover:text-(--color-secondary)"
                 >
                   <X size={28} />
                 </button>
               </div>
 
-              <div className="mt-12 flex flex-col gap-8">
+              {/* Navigation */}
+              <nav className="mt-12 flex flex-col gap-8">
                 {links.map((link) => {
                   const isActive = pathname === link.href;
 
@@ -166,6 +188,18 @@ export default function Navbar() {
                     </Link>
                   );
                 })}
+              </nav>
+
+              {/* Mobile Cart */}
+              <div className="mt-12 border-t border-slate-200 pt-8">
+                <Link
+                  href="/cart"
+                  onClick={() => setMobileMenu(false)}
+                  className="flex items-center gap-3 text-lg font-semibold text-slate-700 transition-colors hover:text-(--color-secondary)"
+                >
+                  <ShoppingCart size={22} />
+                  <span>Cart</span>
+                </Link>
               </div>
             </motion.div>
           </>

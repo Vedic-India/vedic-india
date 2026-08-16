@@ -38,13 +38,6 @@ export default function ProductCard({ product, onEdit }) {
   const productStock = Number(product?.stock ?? 0);
   const productVolume = getProductVolumeBySlug(productSlug);
 
-  const badge =
-    productStock === 0
-      ? "Out of Stock"
-      : productStock <= 10
-      ? "Low Stock"
-      : null;
-
   const { user } = useAuth();
 
   const isAdmin = user?.role === "admin";
@@ -170,30 +163,16 @@ export default function ProductCard({ product, onEdit }) {
             </Button>
           )}
 
-          {/* Stock Badge */}
-
-          {badge && (
-            <span
-              className={`absolute left-3 top-3 z-10 rounded-full px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm sm:left-4 sm:top-4 sm:px-3 sm:text-[11px] ${
-                productStock === 0
-                  ? "bg-red-600"
-                  : "bg-amber-500"
-              }`}
-            >
-              {badge}
-            </span>
-          )}
-
           {/* Product Image */}
 
-          <div className="relative mx-auto aspect-square w-[85%] max-w-56">
+          <div className="relative mx-auto aspect-square w-[96%] max-w-64 sm:w-[90%] sm:max-w-56">
             <Image
               src={image}
               alt={product.name}
               fill
               className="object-contain transition duration-500 group-hover:scale-110"
               sizes="
-                (max-width: 640px) 40vw,
+                (max-width: 640px) 46vw,
                 (max-width: 1024px) 35vw,
                 25vw
               "
